@@ -21,6 +21,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
 	DECLARE_MESSAGE_MAP()
+private:
+	unique_ptr<CDlgItem> m_pDlgItem;
+	unique_ptr<COpenCV> m_pOpenCV;
 public:
 
 	virtual BOOL OnInitDialog();
@@ -35,14 +38,13 @@ public:
 	afx_msg void OnEnChangeEditElementSizeX();
 	afx_msg void OnEnChangeEditElementSizeY();
 
-	int m_iEdit_AnchorX;
-	int m_iEdit_AnchorY;
+	int m_iEdit_Element_AnchorX;
+	int m_iEdit_Element_AnchorY;
 	int GetElementShape();
 	int GetMorphologyOperation();
 	int m_iEdit_Morph_AnchorX;
 	int m_iEdit_Morph_AnchorY;
 
-	UINT m_iEdit_Size;
 	UINT m_iEdit_Element_SizeX;
 	UINT m_iEdit_Element_SizeY;
 

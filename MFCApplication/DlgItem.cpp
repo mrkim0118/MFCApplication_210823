@@ -56,3 +56,19 @@ void CDlgItem::DrawImage(ViewData &View)
 	SetStretchBltMode(View.dc->GetSafeHdc(), COLORONCOLOR);
 	StretchDIBits(View.dc->GetSafeHdc(), 0, 0, View.rect.Width(), View.rect.Height(), 0, 0, View.img->cols, View.img->rows, View.img->data, View.BitMapInfo , DIB_RGB_COLORS, SRCCOPY);
 }
+
+void CDlgItem::InitViewData(CWnd * pWnd)
+{
+	this->m_ViewData_SrcImg.BitMapInfo = NULL;
+	this->m_ViewData_SrcImg.img = new Mat;
+	this->m_ViewData_SrcImg.dc = new CClientDC(pWnd);
+	this->m_ViewData_DstImg.BitMapInfo = NULL;
+	this->m_ViewData_DstImg.img = new Mat;
+	this->m_ViewData_DstImg.dc = new CClientDC(pWnd);
+
+	pWnd->GetClientRect(&this->m_ViewData_SrcImg.rect);
+	pWnd->GetClientRect(&this->m_ViewData_DstImg.rect);
+
+	this->CreateBitMapInfo(this->m_ViewData_DstImg);
+	this->CreateBitMapInfo(this->m_ViewData_SrcImg);
+}

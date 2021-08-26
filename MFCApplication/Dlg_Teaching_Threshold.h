@@ -1,6 +1,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include "DlgItem.h"
 
 
 // CDlg_Teaching_Threshold 대화 상자입니다.
@@ -40,10 +41,6 @@ public:
 	UINT m_iEdit_Adp_BlockSize;
 	UINT m_iEdit_Adp_C;
 	UINT m_iEdit_Threshold;
-
-	CDlgItem::ViewData m_ViewData_SrcImg;
-	CDlgItem::ViewData m_ViewData_DstImg;
-
 
 	afx_msg void OnEnChangeEditAdaptiveBlockSize();
 	afx_msg void OnEnChangeEditAdaptiveC();

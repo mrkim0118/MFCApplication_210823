@@ -13,11 +13,10 @@ IMPLEMENT_DYNAMIC(CDlg_Teaching_Morphology, CDialogEx)
 
 CDlg_Teaching_Morphology::CDlg_Teaching_Morphology(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_MORPHOLOGY, pParent)
-	, m_iEdit_Size(0)
-	, m_iEdit_AnchorX(0)
-	, m_iEdit_AnchorY(0)
-	, m_iEdit_Morph_AnchorX(0)
-	, m_iEdit_Morph_AnchorY(0)
+	, m_iEdit_Element_AnchorX(-1)
+	, m_iEdit_Element_AnchorY(-1)
+	, m_iEdit_Morph_AnchorX(-1)
+	, m_iEdit_Morph_AnchorY(-1)
 	, m_iEdit_Element_SizeX(0)
 	, m_iEdit_Element_SizeY(0)
 {
@@ -32,8 +31,8 @@ void CDlg_Teaching_Morphology::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CMB_ELEMENT_SHAPE, m_Cmb_Element_Shape);
-	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_X, m_iEdit_AnchorX);
-	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_Y, m_iEdit_AnchorY);
+	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_X, m_iEdit_Element_AnchorX);
+	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_Y, m_iEdit_Element_AnchorY);
 	DDX_Control(pDX, IDC_CMB_MORPHOLOGY_OPERATION, m_Cmb_Morph_Operation);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_X, m_iEdit_Morph_AnchorX);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_Y, m_iEdit_Morph_AnchorY);
@@ -59,6 +58,9 @@ BOOL CDlg_Teaching_Morphology::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	m_pDlgItem->m_pWnd = GetDlgItem((IDC_STATIC_MORPHOLOGY_TEST));
+	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd);
+
 	m_Cmb_Element_Shape.AddString(_T("MORPH_RECT"));
 	m_Cmb_Element_Shape.AddString(_T("MORPH_CROSS"));
 	m_Cmb_Element_Shape.AddString(_T("MORPH_ELIPSE"));
@@ -80,8 +82,8 @@ void CDlg_Teaching_Morphology::OnEnChangeEditElementAnchorX()
 {
 	UpdateData(TRUE);
 
-	if (m_iEdit_AnchorX < -1)
-		m_iEdit_AnchorX = -1;
+	if (m_iEdit_Element_AnchorX < -1)
+		m_iEdit_Element_AnchorX = -1;
 
 	UpdateData(FALSE);
 }
@@ -91,8 +93,8 @@ void CDlg_Teaching_Morphology::OnEnChangeEditElementAnchorY()
 {
 	UpdateData(TRUE);
 
-	if (m_iEdit_AnchorY < -1)
-		m_iEdit_AnchorY = -1;
+	if (m_iEdit_Element_AnchorY < -1)
+		m_iEdit_Element_AnchorY = -1;
 
 	UpdateData(FALSE);
 }

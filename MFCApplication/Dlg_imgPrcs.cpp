@@ -214,8 +214,8 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	{
 		COpenCV::ElementParams tElementParams;
 		tElementParams.eShape = (MorphShapes)m_pDlgMorphology->GetElementShape();
-		tElementParams.anchor = Point(m_pDlgMorphology->m_iEdit_AnchorX, m_pDlgMorphology->m_iEdit_AnchorY);
-		tElementParams.ksize = Size(m_pDlgMorphology->m_iEdit_Element_SizeX , m_pDlgMorphology->m_iEdit_Element_SizeY);//(Size)m_pDlgMorphology->m_iEdit_Size;
+		tElementParams.anchor = Point(m_pDlgMorphology->m_iEdit_Element_AnchorX, m_pDlgMorphology->m_iEdit_Element_AnchorY);
+		tElementParams.ksize = Size(m_pDlgMorphology->m_iEdit_Element_SizeX , m_pDlgMorphology->m_iEdit_Element_SizeY);
 
 		COpenCV::MorphologyParams tMorphologyParams;
 		tMorphologyParams.eOperation = (MorphTypes)m_pDlgMorphology->GetMorphologyOperation();
@@ -287,7 +287,6 @@ void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 		break;
 	}
 	}
-	m_Cmb_Mode.SetCurSel(iSelected);
 
 	*pResult = 0;
 }
@@ -321,6 +320,7 @@ void CDlg_ImgPrcs::OnPaint()
 void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 {
 	m_iInspMode = GetInspMode();
+
 	HideAllTeachingDlg();
 	switch (m_iInspMode)
 	{
