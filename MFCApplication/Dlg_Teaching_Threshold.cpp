@@ -18,6 +18,7 @@ CDlg_Teaching_Threshold::CDlg_Teaching_Threshold(CWnd* pParent /*=NULL*/)
 	, m_iEdit_Threshold(0)
 	, m_iEdit_Threshold_Value(0)
 {
+	m_pOpenCV = make_unique<COpenCV>();
 	m_pDlgItem = make_unique<CDlgItem>();
 }
 
@@ -58,18 +59,9 @@ END_MESSAGE_MAP()
 BOOL CDlg_Teaching_Threshold::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	m_pDlgItem->m_ViewData_SrcImg.BitMapInfo = NULL;
-	m_pDlgItem->m_ViewData_SrcImg.img = new Mat;
-	m_pDlgItem->m_ViewData_SrcImg.dc = new CClientDC(GetDlgItem(IDC_STATIC_THRESHOLD_TEST));
-	m_pDlgItem->m_ViewData_DstImg.BitMapInfo = NULL;
-	m_pDlgItem->m_ViewData_DstImg.img = new Mat;
-	m_pDlgItem->m_ViewData_DstImg.dc = new CClientDC(GetDlgItem(IDC_STATIC_THRESHOLD_TEST));
 
-	GetDlgItem(IDC_STATIC_THRESHOLD_TEST)->GetClientRect(&m_pDlgItem->m_ViewData_SrcImg.rect);
-	GetDlgItem(IDC_STATIC_THRESHOLD_TEST)->GetClientRect(&m_pDlgItem->m_ViewData_DstImg.rect);
-
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
+	m_pDlgItem->m_pWnd = GetDlgItem((IDC_STATIC_THRESHOLD_TEST));
+	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd);
 
 	m_Cmb_Adp_Type.AddString(_T("ADAPTIVE_THRESH_MEAN_C"));
 	m_Cmb_Adp_Type.AddString(_T("ADAPTIVE_THRESH_GAUSSIAN_C"));
@@ -229,7 +221,7 @@ void CDlg_Teaching_Threshold::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pSc
 
 		m_iEdit_Threshold_Value = m_Slider_Threshold.GetPos();
 
-		if (m_pDlgItem->m_ViewData_SrcImg.img != NULL)
+		if (m_pDlgItem->m_ViewData_SrcImg.img->empty() != TRUE)
 		{
 			UpdateTestImg();
 		}

@@ -20,7 +20,8 @@ CDlg_Teaching_Morphology::CDlg_Teaching_Morphology(CWnd* pParent /*=NULL*/)
 	, m_iEdit_Element_SizeX(0)
 	, m_iEdit_Element_SizeY(0)
 {
-
+	m_pOpenCV = make_unique<COpenCV>();
+	m_pDlgItem = make_unique<CDlgItem>();
 }
 
 CDlg_Teaching_Morphology::~CDlg_Teaching_Morphology()
