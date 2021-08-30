@@ -416,6 +416,6 @@ void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+	int a = 1;
 	CDialogEx::OnMouseMove(nFlags, point);
 }
