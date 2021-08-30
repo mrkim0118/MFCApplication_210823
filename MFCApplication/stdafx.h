@@ -58,3 +58,4 @@
 #endif
 
 #define WM_THRESHOLD_TEST (WM_USER + 1)
+#define WM_MORPHOLOGY_TEST (WM_USER + 2)

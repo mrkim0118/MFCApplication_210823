@@ -20,6 +20,7 @@ public:
 		MODE_MASK_,
 		MODE_LABELING_,
 		MODE_CONTOUR_,
+		MODE_HISTOGRAM_,
 		MODE_COUNT_MAX
 	};
 };

@@ -28,6 +28,11 @@ private:
 	unique_ptr<CDlgItem> m_pDlgItem;
 	unique_ptr<COpenCV> m_pOpenCV;
 
+	UINT m_iEdit_Adp_BlockSize;
+	UINT m_iEdit_Adp_C;
+	UINT m_iEdit_Threshold;
+
+
 public:
 
 	virtual BOOL OnInitDialog();
@@ -38,10 +43,6 @@ public:
 	CButton m_Chk_Adaptive_Use;
 	CSliderCtrl m_Slider_Threshold;
 
-	UINT m_iEdit_Adp_BlockSize;
-	UINT m_iEdit_Adp_C;
-	UINT m_iEdit_Threshold;
-
 	afx_msg void OnEnChangeEditAdaptiveBlockSize();
 	afx_msg void OnEnChangeEditAdaptiveC();
 	afx_msg void OnCbnSelchangeCmbMethod();
@@ -51,7 +52,9 @@ public:
 	afx_msg void OnPaint();
 
 	afx_msg LRESULT OnReceiveImg(WPARAM wParam , LPARAM lParam);
-
+	int GetThreshold();
+	int GetAdaptiveC();
+	int GetAdaptive_BlockSize();
 	int GetThresholdMethod();
 	int GetAdpThresholdType();
 	int GetAdpThresholdMethod();

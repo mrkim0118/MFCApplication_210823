@@ -103,6 +103,8 @@ int CDlg_ImgPrcs::GetInspMode()
 		m_iInspMode = CImgPrcs::MODE_LABELING_;
 	else if (strMode == _T("Contour"))
 		m_iInspMode = CImgPrcs::MODE_CONTOUR_;
+	else if (strMode == _T("GrayHistogram"))
+		m_iInspMode = CImgPrcs::MODE_HISTOGRAM_;
 
 	return m_iInspMode;
 }
@@ -135,11 +137,8 @@ void CDlg_ImgPrcs::OnBnClickedBtnLoadImg()
 		string strPath(pszString);
 
 		*m_ViewDataSrc.img =  m_pOpenCV->LoadImg(strPath);
-
 		m_pDlgItem->CreateBitMapInfo(m_ViewDataSrc);
-
 		m_pDlgItem->DrawImage(m_ViewDataSrc);
-
 	}
 }
 
@@ -177,6 +176,7 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_Cmb_Mode.AddString(_T("Threshold"));
 	m_Cmb_Mode.AddString(_T("Labeling"));
 	m_Cmb_Mode.AddString(_T("Contour"));
+	m_Cmb_Mode.AddString(_T("GrayHistogram"));
 	m_Cmb_Mode.SetCurSel(0);
 
 	m_ViewDataSrc.dc = new CClientDC(GetDlgItem(IDC_STATIC_SRC_VIEW));
@@ -215,7 +215,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		COpenCV::ElementParams tElementParams;
 		tElementParams.eShape = (MorphShapes)m_pDlgMorphology->GetElementShape();
 		tElementParams.anchor = Point(m_pDlgMorphology->m_iEdit_Element_AnchorX, m_pDlgMorphology->m_iEdit_Element_AnchorY);
-		tElementParams.ksize = Size(m_pDlgMorphology->m_iEdit_Element_SizeX , m_pDlgMorphology->m_iEdit_Element_SizeY);
+		tElementParams.ksize = Size(m_pDlgMorphology->m_iEdit_Element_Size , m_pDlgMorphology->m_iEdit_Element_Size);
 
 		COpenCV::MorphologyParams tMorphologyParams;
 		tMorphologyParams.eOperation = (MorphTypes)m_pDlgMorphology->GetMorphologyOperation();
@@ -233,8 +233,8 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 			COpenCV::AdaptiveThresHoldParams tAdaptiveThresHoldParams;
 			tAdaptiveThresHoldParams.eMethod = (AdaptiveThresholdTypes)m_pDlgThreshold->GetAdpThresholdMethod();
 			tAdaptiveThresHoldParams.eType = (ThresholdTypes)m_pDlgThreshold->GetAdpThresholdType();
-			tAdaptiveThresHoldParams.iBlockSize = m_pDlgThreshold->m_iEdit_Adp_BlockSize;
-			tAdaptiveThresHoldParams.iC = m_pDlgThreshold->m_iEdit_Adp_C;
+			tAdaptiveThresHoldParams.iBlockSize = m_pDlgThreshold->GetAdaptive_BlockSize();
+			tAdaptiveThresHoldParams.iC = m_pDlgThreshold->GetAdaptiveC();
 
 			m_pOpenCV->ThresHold_Adaptive(*m_ViewDataSrc.img, *m_ViewDataDst.img, tAdaptiveThresHoldParams);
 		}
@@ -242,7 +242,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		{
 			COpenCV::ThresHoldParams tThresHoldParams;
 			tThresHoldParams.eType = (ThresholdTypes)m_pDlgThreshold->GetThresholdMethod();
-			tThresHoldParams.iThreshold = m_pDlgThreshold->m_iEdit_Threshold;
+			tThresHoldParams.iThreshold = m_pDlgThreshold->GetThreshold();
 
 			m_pOpenCV->ThresHold(*m_ViewDataSrc.img, *m_ViewDataDst.img, tThresHoldParams);
 		}
@@ -262,6 +262,9 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		m_pOpenCV->Contour(*m_ViewDataDst.img, *m_ViewDataDst.img, tContourParams);
 		break;
 	}
+	case CImgPrcs::MODE_HISTOGRAM_:
+		m_pOpenCV->Histogram(*m_ViewDataSrc.img , *m_ViewDataDst.img);
+		break;
 	}
 	m_pDlgItem->CreateBitMapInfo(m_ViewDataDst);
 	m_pDlgItem->DrawImage(m_ViewDataDst);
@@ -302,11 +305,30 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToSrc()
 
 void CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg()
 {
-	if (m_pDlgThreshold != NULL)
+	m_iInspMode = GetInspMode();
+
+	switch (m_iInspMode)
 	{
-		*m_pMessageImg = m_ViewDataSrc.img->clone();
-		::SendMessage(m_pDlgThreshold->GetSafeHwnd(), WM_THRESHOLD_TEST, NULL, (LPARAM)m_pMessageImg);
+	case CImgPrcs::MODE_THRESHOLD_:
+	{
+		if (m_pDlgThreshold != NULL)
+		{
+			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			::SendMessage(m_pDlgThreshold->GetSafeHwnd(), WM_THRESHOLD_TEST, NULL, (LPARAM)m_pMessageImg);
+		}
+		break;
 	}
+	case CImgPrcs::MODE_MORPHOLOGY_:
+	{
+		if (m_pDlgMorphology != NULL)
+		{
+			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			::SendMessage(m_pDlgMorphology->GetSafeHwnd(), WM_MORPHOLOGY_TEST, NULL, (LPARAM)m_pMessageImg);
+		}
+		break;
+	}
+	}
+
 }
 
 void CDlg_ImgPrcs::OnPaint()

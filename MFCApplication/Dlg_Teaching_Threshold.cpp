@@ -104,9 +104,6 @@ void CDlg_Teaching_Threshold::OnEnChangeEditAdaptiveBlockSize()
 {
 	UpdateData(TRUE);
 
-	if (m_iEdit_Adp_BlockSize < 3)
-		m_iEdit_Adp_BlockSize = 3;
-
 	if ((m_iEdit_Adp_BlockSize % 2) == 0)
 	{
 		m_iEdit_Adp_BlockSize -=1;
@@ -210,6 +207,27 @@ LRESULT CDlg_Teaching_Threshold::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
 
 	return 0;
+}
+
+int CDlg_Teaching_Threshold::GetThreshold()
+{
+	return m_iEdit_Threshold;
+}
+
+int CDlg_Teaching_Threshold::GetAdaptiveC()
+{
+	return m_iEdit_Adp_C;
+}
+
+int CDlg_Teaching_Threshold::GetAdaptive_BlockSize()
+{
+
+	if (m_iEdit_Adp_BlockSize < 3)
+		m_iEdit_Adp_BlockSize = 3;
+	
+	UpdateData(FALSE);
+
+	return m_iEdit_Adp_BlockSize;
 }
 
 

@@ -229,27 +229,46 @@ bool COpenCV::Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg)
 	return TRUE;
 }
 
-bool COpenCV::Histogram(InputArray SrcImg)
+bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 {
 	Mat mSrc = SrcImg.getMat();
 	if (CheckImg(mSrc) == TRUE)
 	{
-		if (mSrc.type() == CV_8UC1)
+		Mat Cvt;
+		cvtColor(mSrc, Cvt, COLOR_BGR2GRAY);
+		Mat Hist;
+		if (Cvt.type() == CV_8UC1)
 		{
-			Mat mHist;
 			int iChannels[] = { 0 };
 			int idimensions = 1;
 			const int iHistSize[] = { 256 };
 			float fGrayLevel[] = { 0 , 256 };
 			const float* fRanges[] = { fGrayLevel };
 
-			calcHist(&mSrc, 1, iChannels, noArray(), mHist, idimensions, iHistSize, fRanges);
-
+			calcHist(&Cvt, 1, iChannels, noArray(), Hist, idimensions, iHistSize, fRanges);
+			GetHistogramImg(Hist, DstImg);
 		}
 		else
 		{ }
 	}
 	return 0;
+}
+
+bool COpenCV::GetHistogramImg( Mat & Img , Mat &Dst)
+{
+	CV_Assert(Img.type() == CV_32FC1);
+	CV_Assert(Img.size() == Size(1,256));
+
+	double dHistMax;
+	minMaxLoc(Img, 0, &dHistMax);
+
+	Mat imgHist(100, 256, CV_8UC1, Scalar(255));
+	Dst = imgHist.clone();
+	for (int i = 0; i < 256; i++)
+	{
+		line(Dst, Point(i, 100), Point(i, 100 - cvRound(Img.at<float>(i, 0) * 100 / dHistMax)), Scalar(0));
+	}
+	imshow("hist",Dst);
 }
 
 bool COpenCV::ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &tThresHoldParams)

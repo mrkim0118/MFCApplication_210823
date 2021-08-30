@@ -17,8 +17,8 @@ CDlg_Teaching_Morphology::CDlg_Teaching_Morphology(CWnd* pParent /*=NULL*/)
 	, m_iEdit_Element_AnchorY(-1)
 	, m_iEdit_Morph_AnchorX(-1)
 	, m_iEdit_Morph_AnchorY(-1)
-	, m_iEdit_Element_SizeX(0)
-	, m_iEdit_Element_SizeY(0)
+	, m_iEdit_Element_Size(1)
+	, m_iEdit_Morph_Size_Value(0)
 {
 	m_pOpenCV = make_unique<COpenCV>();
 	m_pDlgItem = make_unique<CDlgItem>();
@@ -37,8 +37,9 @@ void CDlg_Teaching_Morphology::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CMB_MORPHOLOGY_OPERATION, m_Cmb_Morph_Operation);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_X, m_iEdit_Morph_AnchorX);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_Y, m_iEdit_Morph_AnchorY);
-	DDX_Text(pDX, IDC_EDIT_ELEMENT_SIZE_X, m_iEdit_Element_SizeX);
-	DDX_Text(pDX, IDC_EDIT_ELEMENT_SIZE_Y, m_iEdit_Element_SizeY);
+	DDX_Text(pDX, IDC_EDIT_ELEMENT_SIZE, m_iEdit_Element_Size);
+	DDX_Control(pDX, IDC_SLIDER_MORPH_SIZE, m_Slider_Morph_Size);
+	DDX_Text(pDX, IDC_EDIT_MORPH_SIZE_VALUE, m_iEdit_Morph_Size_Value);
 }
 
 
@@ -47,8 +48,11 @@ BEGIN_MESSAGE_MAP(CDlg_Teaching_Morphology, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT_ELEMENT_ANCHOR_Y, &CDlg_Teaching_Morphology::OnEnChangeEditElementAnchorY)
 	ON_EN_CHANGE(IDC_EDIT_MORPHOLOGY_ANCHOR_X, &CDlg_Teaching_Morphology::OnEnChangeEditMorphologyAnchorX)
 	ON_EN_CHANGE(IDC_EDIT_MORPHOLOGY_ANCHOR_Y, &CDlg_Teaching_Morphology::OnEnChangeEditMorphologyAnchorY)
-	ON_EN_CHANGE(IDC_EDIT_ELEMENT_SIZE_X, &CDlg_Teaching_Morphology::OnEnChangeEditElementSizeX)
-	ON_EN_CHANGE(IDC_EDIT_ELEMENT_SIZE_Y, &CDlg_Teaching_Morphology::OnEnChangeEditElementSizeY)
+	ON_EN_CHANGE(IDC_EDIT_ELEMENT_SIZE, &CDlg_Teaching_Morphology::OnEnChangeEditElementSize)
+	ON_WM_HSCROLL()
+	ON_EN_CHANGE(IDC_EDIT_MORPH_SIZE_VALUE, &CDlg_Teaching_Morphology::OnEnChangeEditMorphSizeValue)
+
+	ON_MESSAGE(WM_MORPHOLOGY_TEST, OnReceiveImg)
 END_MESSAGE_MAP()
 
 
@@ -74,6 +78,12 @@ BOOL CDlg_Teaching_Morphology::OnInitDialog()
 	m_Cmb_Morph_Operation.AddString(_T("MORPH_GREDIENT"));
 	m_Cmb_Morph_Operation.SetCurSel(0);
 
+	m_Slider_Morph_Size.SetRange(1, 20);
+	m_Slider_Morph_Size.SetPos(m_iEdit_Element_Size);
+	m_Slider_Morph_Size.SetLineSize(1);
+	m_Slider_Morph_Size.SetPageSize(1);
+
+	m_iEdit_Morph_Size_Value = m_Slider_Morph_Size.GetPos();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -127,6 +137,23 @@ int CDlg_Teaching_Morphology::GetElementShape()
 	int iType = 0;
 	m_Cmb_Element_Shape .GetLBText(m_Cmb_Element_Shape.GetCurSel(), strMode);
 
+	if (strMode == _T("MORPH_RECT"))
+		iType = MorphShapes::MORPH_RECT;
+	else if (strMode == _T("MORPH_CROSS"))
+		iType = MorphShapes::MORPH_CROSS;
+	else if (strMode == _T("MORPH_ELLIPSE"))
+		iType = MorphShapes::MORPH_ELLIPSE;
+
+
+	return iType;
+}
+
+int CDlg_Teaching_Morphology::GetMorphologyOperation()
+{
+	CString strMode = _T("");
+	int iType = 0;
+	m_Cmb_Morph_Operation.GetLBText(m_Cmb_Morph_Operation.GetCurSel(), strMode);
+
 	if (strMode == _T("MORPH_ERODE"))
 		iType = MorphTypes::MORPH_ERODE;
 	else if (strMode == _T("MORPH_DILATE"))
@@ -141,37 +168,85 @@ int CDlg_Teaching_Morphology::GetElementShape()
 	return iType;
 }
 
-int CDlg_Teaching_Morphology::GetMorphologyOperation()
-{
-	CString strMode = _T("");
-	int iMethod = 0;
-	m_Cmb_Morph_Operation.GetLBText(m_Cmb_Morph_Operation.GetCurSel(), strMode);
-
-	if (strMode == _T("THRESH_BINARY"))
-		iMethod = ThresholdTypes::THRESH_BINARY;
-	else if (strMode == _T("THRESH_BINARY_INV"))
-		iMethod = ThresholdTypes::THRESH_BINARY_INV;
-
-	return iMethod;
-}
-
-void CDlg_Teaching_Morphology::OnEnChangeEditElementSizeX()
+void CDlg_Teaching_Morphology::OnEnChangeEditElementSize()
 {
 	UpdateData(TRUE);
 
-	if (m_iEdit_Element_SizeX< 1)
-		m_iEdit_Element_SizeX = 1;
+	if (m_iEdit_Element_Size< 1)
+		m_iEdit_Element_Size = 1;
 
 	UpdateData(FALSE);
 }
 
 
-void CDlg_Teaching_Morphology::OnEnChangeEditElementSizeY()
+
+
+void CDlg_Teaching_Morphology::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
+	if (IDC_SLIDER_MORPH_SIZE == pScrollBar->GetDlgCtrlID())
+	{
+		UpdateData(TRUE);
+
+		m_iEdit_Morph_Size_Value = m_Slider_Morph_Size.GetPos();
+
+		if (m_pDlgItem->m_ViewData_SrcImg.img->empty() != TRUE)
+		{
+			UpdateTestImg();
+		}
+
+		UpdateData(FALSE);
+	}
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CDlg_Teaching_Morphology::OnEnChangeEditMorphSizeValue()
+{
+	int iMin = m_Slider_Morph_Size.GetRangeMin();
+	int iMax = m_Slider_Morph_Size.GetRangeMax();
+
 	UpdateData(TRUE);
 
-	if (m_iEdit_Element_SizeY< 1)
-		m_iEdit_Element_SizeY = 1;
+	if (m_iEdit_Morph_Size_Value < iMin)
+		m_iEdit_Morph_Size_Value = iMin;
+
+	else if (m_iEdit_Morph_Size_Value > iMax)
+		m_iEdit_Morph_Size_Value = iMax;
+
+	m_Slider_Morph_Size.SetPos(m_iEdit_Morph_Size_Value);
+
+	if (m_pDlgItem->m_ViewData_SrcImg.img != NULL)
+	{
+		UpdateTestImg();
+	}
 
 	UpdateData(FALSE);
+}
+
+void CDlg_Teaching_Morphology::UpdateTestImg()
+{
+	COpenCV::ElementParams tElementParams;
+	tElementParams.eShape = (MorphShapes)GetElementShape();
+	tElementParams.anchor = Point(m_iEdit_Element_AnchorX, m_iEdit_Element_AnchorY);
+	tElementParams.ksize = Size(m_iEdit_Morph_Size_Value, m_iEdit_Morph_Size_Value);
+
+	COpenCV::MorphologyParams tMorphologyParams;
+	tMorphologyParams.eOperation = (MorphTypes)GetMorphologyOperation();
+	tMorphologyParams.Anchor = Point(m_iEdit_Morph_AnchorX, m_iEdit_Morph_AnchorY);
+	tMorphologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
+
+	m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_SrcImg.img, *m_pDlgItem->m_ViewData_DstImg.img, tMorphologyParams, tElementParams);
+
+	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+}
+
+LRESULT CDlg_Teaching_Morphology::OnReceiveImg(WPARAM wParam, LPARAM lParam)
+{
+	m_pDlgItem->m_ViewData_SrcImg.img = (Mat*)lParam;
+	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
+
+	return 0;
 }

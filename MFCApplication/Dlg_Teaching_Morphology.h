@@ -1,5 +1,6 @@
 #pragma once
 #include "afxwin.h"
+#include "afxcmn.h"
 
 
 // CDlg_Teaching_Morphology 대화 상자입니다.
@@ -30,13 +31,17 @@ public:
 
 	CComboBox m_Cmb_Morph_Operation;
 	CComboBox m_Cmb_Element_Shape;
+	CSliderCtrl m_Slider_Morph_Size;
 
 	afx_msg void OnEnChangeEditElementAnchorX();
 	afx_msg void OnEnChangeEditElementAnchorY();
 	afx_msg void OnEnChangeEditMorphologyAnchorX();
 	afx_msg void OnEnChangeEditMorphologyAnchorY();
-	afx_msg void OnEnChangeEditElementSizeX();
-	afx_msg void OnEnChangeEditElementSizeY();
+	afx_msg void OnEnChangeEditElementSize();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnEnChangeEditMorphSizeValue();
+	afx_msg LRESULT OnReceiveImg(WPARAM wParam, LPARAM lParam);
+
 
 	int m_iEdit_Element_AnchorX;
 	int m_iEdit_Element_AnchorY;
@@ -44,8 +49,9 @@ public:
 	int GetMorphologyOperation();
 	int m_iEdit_Morph_AnchorX;
 	int m_iEdit_Morph_AnchorY;
+	int m_iEdit_Morph_Size_Value;
 
-	UINT m_iEdit_Element_SizeX;
-	UINT m_iEdit_Element_SizeY;
+	UINT m_iEdit_Element_Size;
 
+	void UpdateTestImg();
 };
