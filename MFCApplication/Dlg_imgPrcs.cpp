@@ -65,12 +65,14 @@ void CDlg_ImgPrcs::HideAllTeachingDlg()
 {
 	m_pDlgMorphology->ShowWindow(SW_HIDE);
 	m_pDlgThreshold->ShowWindow(SW_HIDE);
+	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
 }
 
 void CDlg_ImgPrcs::InitTeachingTab()
 {
 	m_Teaching_Tab.InsertItem(0, _T("Threshold"));
 	m_Teaching_Tab.InsertItem(1, _T("Morphology"));
+	m_Teaching_Tab.InsertItem(2, _T("TemplateMatch"));
 	m_Teaching_Tab.SetCurSel(0);
 
 	CRect rect;
@@ -85,6 +87,11 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	m_pDlgMorphology->Create(IDD_DLG_MORPHOLOGY, &m_Teaching_Tab);
 	m_pDlgMorphology->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgMorphology->ShowWindow(SW_HIDE);
+
+	m_pDlgTemplateMatch = new CDlg_Teaching_Template_Match;
+	m_pDlgTemplateMatch->Create(IDD_DLG_TEMPLATE_MATCH, &m_Teaching_Tab);
+	m_pDlgTemplateMatch->MoveWindow(0, 20, rect.Width(), rect.Height());
+	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
 
 }
 
@@ -105,6 +112,8 @@ int CDlg_ImgPrcs::GetInspMode()
 		m_iInspMode = CImgPrcs::MODE_CONTOUR_;
 	else if (strMode == _T("GrayHistogram"))
 		m_iInspMode = CImgPrcs::MODE_HISTOGRAM_;
+	else if (strMode == _T("TemplateMatch"))
+		m_iInspMode = CImgPrcs::MODE_TEMPLATE_MATCH_;
 
 	return m_iInspMode;
 }
@@ -120,6 +129,9 @@ BEGIN_MESSAGE_MAP(CDlg_ImgPrcs, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_DST_TO_THRESHOLD_DLG, &CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg)
 	ON_WM_PAINT()
 	ON_CBN_SELCHANGE(IDC_CMB_MODE, &CDlg_ImgPrcs::OnCbnSelchangeCmbMode)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 
@@ -263,9 +275,18 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		break;
 	}
 	case CImgPrcs::MODE_HISTOGRAM_:
-		m_pOpenCV->Histogram(*m_ViewDataSrc.img , *m_ViewDataDst.img);
+	{
+		m_pOpenCV->Histogram(*m_ViewDataSrc.img, *m_ViewDataDst.img);
 		break;
 	}
+	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	{
+		COpenCV::TemplateMatchParams tTemplateMatchParams;
+		m_pOpenCV->TemplateMatching(*m_ViewDataDst.img, *m_ViewDataDst.img, tTemplateMatchParams.Model, tTemplateMatchParams.eTemplateMatchModes);
+	}
+	}
+
+
 	m_pDlgItem->CreateBitMapInfo(m_ViewDataDst);
 	m_pDlgItem->DrawImage(m_ViewDataDst);
 }
@@ -287,6 +308,11 @@ void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 	case CImgPrcs::MODE_THRESHOLD_:
 	{
 		m_pDlgThreshold->ShowWindow(SW_SHOW);
+		break;
+	}
+	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	{
+		m_pDlgTemplateMatch->ShowWindow(SW_SHOW);
 		break;
 	}
 	}
@@ -327,6 +353,15 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg()
 		}
 		break;
 	}
+	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	{
+		if (m_pDlgTemplateMatch != NULL)
+		{
+			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_TEST, NULL, (LPARAM)m_pMessageImg);
+		}
+		break;
+	}
 	}
 
 }
@@ -352,7 +387,35 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 	case CImgPrcs::MODE_MORPHOLOGY_:
 		m_pDlgMorphology->ShowWindow(SW_SHOW);
 		break;
+	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+		m_pDlgTemplateMatch->ShowWindow(SW_SHOW);
+		break;
+
 	}
 
 	m_Teaching_Tab.SetCurSel(m_iInspMode);
+}
+
+
+void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	m_ptRect_Start = point;
+	
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	m_ptRect_End = point;
+
+	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+
+void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnMouseMove(nFlags, point);
 }

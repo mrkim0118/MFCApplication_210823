@@ -204,6 +204,7 @@
     <ClInclude Include="DlgItem.h" />
     <ClInclude Include="Dlg_imgPrcs.h" />
     <ClInclude Include="Dlg_Teaching_Morphology.h" />
+    <ClInclude Include="Dlg_Teaching_Template_Match.h" />
     <ClInclude Include="Dlg_Teaching_Threshold.h" />
     <ClInclude Include="MFCApplication.h" />
     <ClInclude Include="MFCApplicationDlg.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="DlgItem.cpp" />
     <ClCompile Include="Dlg_imgPrcs.cpp" />
     <ClCompile Include="Dlg_Teaching_Morphology.cpp" />
+    <ClCompile Include="Dlg_Teaching_Template_Match.cpp" />
     <ClCompile Include="Dlg_Teaching_Threshold.cpp" />
     <ClCompile Include="MFCApplication.cpp" />
     <ClCompile Include="MFCApplicationDlg.cpp" />

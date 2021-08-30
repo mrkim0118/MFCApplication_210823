@@ -32,13 +32,14 @@ void CDlg_Teaching_Morphology::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CMB_ELEMENT_SHAPE, m_Cmb_Element_Shape);
+	DDX_Control(pDX, IDC_CMB_MORPHOLOGY_OPERATION, m_Cmb_Morph_Operation);
+	DDX_Control(pDX, IDC_SLIDER_MORPH_SIZE, m_Slider_Morph_Size);
+
 	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_X, m_iEdit_Element_AnchorX);
 	DDX_Text(pDX, IDC_EDIT_ELEMENT_ANCHOR_Y, m_iEdit_Element_AnchorY);
-	DDX_Control(pDX, IDC_CMB_MORPHOLOGY_OPERATION, m_Cmb_Morph_Operation);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_X, m_iEdit_Morph_AnchorX);
 	DDX_Text(pDX, IDC_EDIT_MORPHOLOGY_ANCHOR_Y, m_iEdit_Morph_AnchorY);
 	DDX_Text(pDX, IDC_EDIT_ELEMENT_SIZE, m_iEdit_Element_Size);
-	DDX_Control(pDX, IDC_SLIDER_MORPH_SIZE, m_Slider_Morph_Size);
 	DDX_Text(pDX, IDC_EDIT_MORPH_SIZE_VALUE, m_iEdit_Morph_Size_Value);
 }
 
@@ -134,18 +135,18 @@ void CDlg_Teaching_Morphology::OnEnChangeEditMorphologyAnchorY()
 int CDlg_Teaching_Morphology::GetElementShape()
 {
 	CString strMode = _T("");
-	int iType = 0;
+	int iShape = 0;
 	m_Cmb_Element_Shape .GetLBText(m_Cmb_Element_Shape.GetCurSel(), strMode);
 
 	if (strMode == _T("MORPH_RECT"))
-		iType = MorphShapes::MORPH_RECT;
+		iShape = MorphShapes::MORPH_RECT;
 	else if (strMode == _T("MORPH_CROSS"))
-		iType = MorphShapes::MORPH_CROSS;
+		iShape = MorphShapes::MORPH_CROSS;
 	else if (strMode == _T("MORPH_ELLIPSE"))
-		iType = MorphShapes::MORPH_ELLIPSE;
+		iShape = MorphShapes::MORPH_ELLIPSE;
 
 
-	return iType;
+	return iShape;
 }
 
 int CDlg_Teaching_Morphology::GetMorphologyOperation()

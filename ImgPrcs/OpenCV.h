@@ -77,6 +77,12 @@ public:
 		ContourApproximationModes eContourApproximationMode = CHAIN_APPROX_NONE;
 	};
 
+	struct TemplateMatchParams
+	{
+		Mat Model;
+		TemplateMatchModes eTemplateMatchModes = TM_CCOEFF_NORMED;
+	};
+
 public:
 	bool CheckImg(Mat img);
 	bool CheckImgPath(String strFilePath);
@@ -88,6 +94,7 @@ public:
 	bool ThresHold_Adaptive(InputArray SrcImg , Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams);
 	bool ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &ThresHoldParams);
 	bool Morphology(InputArray SrcImg , Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams);
+	bool TemplateMatching(InputArray SrcImg, Mat& DstImg, Mat Model, TemplateMatchModes eTemplateMatchModes);
 	int Labeling(InputArray SrcImg , Mat& DstImg, LabelingParams &tLabelingParams);
 	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
 

@@ -7,6 +7,7 @@
 
 #include "Dlg_Teaching_Threshold.h"
 #include "Dlg_Teaching_Morphology.h"
+#include "Dlg_Teaching_Template_Match.h"
 
 
 using namespace cv;
@@ -40,6 +41,7 @@ private:
 
 	CDlg_Teaching_Threshold *m_pDlgThreshold;
 	CDlg_Teaching_Morphology *m_pDlgMorphology;
+	CDlg_Teaching_Template_Match *m_pDlgTemplateMatch;
 
 	CDlgItem::ViewData m_ViewDataSrc;
 	CDlgItem::ViewData m_ViewDataDst;
@@ -47,6 +49,8 @@ private:
 
 	int m_iInspMode;
 	CComboBox m_Cmb_Mode;
+	CPoint m_ptRect_Start;
+	CPoint m_ptRect_End;
 public:
 
 	void HideAllTeachingDlg();
@@ -67,4 +71,7 @@ public:
 	afx_msg void OnBnClickedBtnDstToThresholdDlg();
 	afx_msg void OnPaint();
 	afx_msg void OnCbnSelchangeCmbMode();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };

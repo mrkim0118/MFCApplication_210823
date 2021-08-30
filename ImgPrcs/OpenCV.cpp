@@ -274,7 +274,7 @@ bool COpenCV::GetHistogramImg( Mat & Img , Mat &Dst)
 bool COpenCV::ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &tThresHoldParams)
 {
 	Mat mSrc = SrcImg.getMat();
-	if (CheckImg(mSrc) == TRUE)
+	if (CheckImg(mSrc) == true)
 	{
 		if (mSrc.type() != CV_8UC1)
 		{
@@ -285,16 +285,16 @@ bool COpenCV::ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &tThresH
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 
 bool COpenCV::ThresHold_Adaptive(InputArray SrcImg, Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams)
 {
 	Mat mSrc = SrcImg.getMat();
-	if (CheckImg(mSrc) == TRUE)
+	if (CheckImg(mSrc) == true)
 	{
 		if (mSrc.type() != CV_8UC1)
 		{
@@ -305,32 +305,54 @@ bool COpenCV::ThresHold_Adaptive(InputArray SrcImg, Mat& DstImg, AdaptiveThresHo
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 bool COpenCV::Morphology(InputArray SrcImg, Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams)
 {
 	Mat mSrc = SrcImg.getMat();
-	if (CheckImg(mSrc) == TRUE)
+	if (CheckImg(mSrc) == true)
 	{
 		tMorPhologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 		morphologyEx(mSrc, DstImg, tMorPhologyParams.eOperation, tMorPhologyParams.Kernel, tMorPhologyParams.Anchor, tMorPhologyParams.iIterator, tMorPhologyParams.eBorderType, tMorPhologyParams.borderValue);
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
+}
+
+bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, Mat Model, TemplateMatchModes eTemplateMatchModes)
+{
+	Mat mSrc = SrcImg.getMat();
+	Mat Result , Result_Norm;
+	if (CheckImg(mSrc) == true)
+	{
+		matchTemplate(mSrc, Model, Result, eTemplateMatchModes);
+		normalize(Result, Result_Norm, 0, 255, NORM_MINMAX, CV_8U);
+
+		double dMax = 0.0;
+		Point MaxLoc;
+
+		minMaxLoc(Result, 0 ,&dMax, 0 , &MaxLoc);
+
+		rectangle(mSrc, Rect(MaxLoc.x, MaxLoc.y, Model.cols, Model.rows), Scalar(0, 0, 255), 2);
+	}
+	return true;
 }
 
 int COpenCV::Labeling(InputArray SrcImg, Mat &DstImg, LabelingParams &tLabelingParams)
 {
 	int iLabelCount = 0;
-	iLabelCount = connectedComponentsWithStats(SrcImg, tLabelingParams.labels, tLabelingParams.stats, tLabelingParams.centroids);
-
-	if (tLabelingParams.bDrawRect == TRUE)
+	Mat mSrc = SrcImg.getMat();
+	if (CheckImg(mSrc) == true)
+	{
+		iLabelCount = connectedComponentsWithStats(SrcImg, tLabelingParams.labels, tLabelingParams.stats, tLabelingParams.centroids);
+	}
+	if (tLabelingParams.bDrawRect == true)
 	{
 		Mat Dst;
 		cvtColor(SrcImg, Dst, COLOR_GRAY2BGR);
@@ -355,8 +377,11 @@ int COpenCV::Labeling(InputArray SrcImg, Mat &DstImg, LabelingParams &tLabelingP
 ContoursType COpenCV::Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams)
 {	
 	vector<vector<Point>> Contours;
-	findContours(SrcImg, Contours, tContourParams.eRetrievalMode, tContourParams.eContourApproximationMode);
-
+	Mat mSrc = SrcImg.getMat();
+	if (CheckImg(mSrc) == true)
+	{
+		findContours(SrcImg, Contours, tContourParams.eRetrievalMode, tContourParams.eContourApproximationMode);
+	}
 	cvtColor(SrcImg, DstImg, COLOR_GRAY2BGR);
 
 	if (tContourParams.bDrawLine == true)
