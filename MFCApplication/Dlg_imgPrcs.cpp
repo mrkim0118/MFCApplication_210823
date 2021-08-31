@@ -118,21 +118,27 @@ int CDlg_ImgPrcs::GetInspMode()
 	return m_iInspMode;
 }
 
-void CDlg_ImgPrcs::OnDrawImage(CDlgItem::ViewData& viewdata)
+void CDlg_ImgPrcs::OnDrawROI(CDlgItem::ViewData& viewdata)
 {
 	// Picture Control DC를 생성.
 	// IDC_PC_IMAGE는 Picture Control의 Resource ID.
 
 	// Picture Control 크기를 얻는다.
-	CRect rect;
-	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&rect);
+	//CRect rect;
+	//GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&rect);
 
-	CWnd* pWnd = NULL;
-	pWnd = GetDlgItem(IDC_STATIC_SRC_VIEW);
-	CDC *pDCc = pWnd->GetDC();
+	//CWnd* pWnd = NULL;
+	//pWnd = GetDlgItem(IDC_STATIC_SRC_VIEW);
+	//CDC *pDCc = pWnd->GetDC();
 
 	CDC memDC;
 	CBitmap *pOldBitmap, bitmap;
+	CPen *pOldPen = NULL;
+	CBrush *pOldBrush = NULL;
+
+	CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));
+	CBrush brushRed;
+	brushRed.CreateStockObject(NULL_BRUSH);
 
 	// Picture Control DC에 호환되는 새로운 CDC를 생성. (임시 버퍼)
 	memDC.CreateCompatibleDC(viewdata.dc);
@@ -141,28 +147,21 @@ void CDlg_ImgPrcs::OnDrawImage(CDlgItem::ViewData& viewdata)
 	// 임시 버퍼에서 방금 생성한 비트맵을 선택하면서, 이전 비트맵을 보존.
 	pOldBitmap = memDC.SelectObject(&bitmap);
 
-	memDC.BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), viewdata.dc, 0, 0, SRCCOPY);
-	//memDC.BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), viewdata.dc, 0, 0, SRCCOPY);
-
-	CPen *pOldPen = NULL;
-	CBrush *pOldBrush = NULL;
-
-	CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));
-	CBrush brushRed;
-	brushRed.CreateStockObject(NULL_BRUSH);
+	SetStretchBltMode(memDC.GetSafeHdc(), COLORONCOLOR);
+	StretchDIBits(memDC.GetSafeHdc(), 0, 0, viewdata.rect.Width(), viewdata.rect.Height(), 0, 0, viewdata.img->cols, viewdata.img->rows, viewdata.img->data, viewdata.BitMapInfo, DIB_RGB_COLORS, SRCCOPY);
 
 	pOldPen = memDC.SelectObject(&penRed);
 	pOldBrush = memDC.SelectObject(&brushRed);
 
-	memDC.Rectangle(m_ptRect_Start.x , m_ptRect_Start.y , m_ptRect_End.x , m_ptRect_End.y);
-
+	memDC.Rectangle(m_ptRect_Start.x-32 , m_ptRect_Start.y-40 , m_ptRect_End.x-32 , m_ptRect_End.y-40);
+	//memDC.Rectangle(CRect(m_ptRect_Start , m_ptRect_End));
 	memDC.SelectObject(pOldPen);
 	memDC.SelectObject(pOldBrush);
 
 	// 임시 버퍼에 검은색으로 채움.
 	//memDC.PatBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), BLACKNESS);
 	// 임시 버퍼를 Picture Control에 그린다.
-	pDCc->BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), &memDC, 0, 0, SRCCOPY);
+	viewdata.dc->BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), &memDC, 0, 0, SRCCOPY);
 
 	// 이전 비트맵으로 재설정.
     memDC.SelectObject(pOldBitmap);
@@ -173,7 +172,7 @@ void CDlg_ImgPrcs::OnDrawImage(CDlgItem::ViewData& viewdata)
 	// 생성한 리소스 해제.
 	memDC.DeleteDC();
 	bitmap.DeleteObject();
-	pWnd->ReleaseDC(pDCc);
+
 }
 
 
@@ -247,6 +246,7 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_Cmb_Mode.AddString(_T("Labeling"));
 	m_Cmb_Mode.AddString(_T("Contour"));
 	m_Cmb_Mode.AddString(_T("GrayHistogram"));
+	m_Cmb_Mode.AddString(_T("TemplateMatch"));
 	m_Cmb_Mode.SetCurSel(0);
 
 
@@ -418,7 +418,11 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg()
 	{
 		if (m_pDlgTemplateMatch != NULL)
 		{
-			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			Mat img;
+			img(Rect(m_ptRect_Start.x, m_ptRect_Start.y, m_ptRect_End.x - m_ptRect_Start.x, m_ptRect_End.y - m_ptRect_Start.y));
+			copyTo(*m_ViewDataSrc.img, *m_pMessageImg, img);
+			//Rect Crop(m_ptRect_Start.x, m_ptRect_Start.y, m_ptRect_End.x, m_ptRect_End.y);
+			//*m_pMessageImg = m_ViewDataSrc.img->clone();  (Crop);
 			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_TEST, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
@@ -460,26 +464,32 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 
 void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
-		&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+	m_iInspMode = GetInspMode();
+	if (m_iInspMode == CImgPrcs::MODE_TEMPLATE_MATCH_)
 	{
-		m_ptRect_Start = point;
-		m_bClicked = true;
+		if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
+			&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+		{
+			m_ptRect_Start = point;
+			m_bClicked = true;
+		}
 	}
-	CDialogEx::OnLButtonDown(nFlags, point);
 }
 
 
 void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	m_bClicked = false;
-	if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
-		&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+	if (m_iInspMode == CImgPrcs::MODE_TEMPLATE_MATCH_)
 	{
-		m_ptRect_End = point;
-		OnDrawImage(m_ViewDataSrc);
+		if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
+			&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+		{
+			m_bClicked = false;
+			m_ptRect_End = point;
+			OnDrawROI(m_ViewDataSrc);
+		}
 	}
-	CDialogEx::OnLButtonUp(nFlags, point);
+
 }
 
 
@@ -491,7 +501,7 @@ void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 		if (m_bClicked == true)
 		{
 			m_ptRect_End = point;
-			OnDrawImage(m_ViewDataSrc);
+			OnDrawROI(m_ViewDataSrc);
 		}
 	}
 

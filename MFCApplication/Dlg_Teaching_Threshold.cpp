@@ -151,6 +151,20 @@ int CDlg_Teaching_Threshold::GetThresholdMethod()
 int CDlg_Teaching_Threshold::GetAdpThresholdType()
 {
 	CString strMode = _T("");
+	int iMethod = 0;
+	m_Cmb_Adp_Method.GetLBText(m_Cmb_Adp_Method.GetCurSel(), strMode);
+
+	if (strMode == _T("THRESH_BINARY"))
+		iMethod = ThresholdTypes::THRESH_BINARY;
+	else if (strMode == _T("THRESH_BINARY_INV"))
+		iMethod = ThresholdTypes::THRESH_BINARY_INV;
+
+	return iMethod;
+}
+
+int CDlg_Teaching_Threshold::GetAdpThresholdMethod()
+{
+	CString strMode = _T("");
 	int iType = 0;
 	m_Cmb_Adp_Type.GetLBText(m_Cmb_Adp_Type.GetCurSel(), strMode);
 
@@ -160,20 +174,7 @@ int CDlg_Teaching_Threshold::GetAdpThresholdType()
 		iType = AdaptiveThresholdTypes::ADAPTIVE_THRESH_GAUSSIAN_C;
 
 	return iType;
-}
 
-int CDlg_Teaching_Threshold::GetAdpThresholdMethod()
-{
-	CString strMode = _T("");
-	int iMethod = 0;
-	m_Cmb_Adp_Method.GetLBText(m_Cmb_Adp_Method.GetCurSel(), strMode);
-
-	if (strMode == _T("THRESH_BINARY"))
-		iMethod = ThresholdTypes::THRESH_BINARY;
-	else if (strMode == _T("THRESH_BINARY_INV"))
-		iMethod = ThresholdTypes::THRESH_BINARY_INV;
-	
-	return iMethod;
 }
 
 void CDlg_Teaching_Threshold::UpdateTestImg()

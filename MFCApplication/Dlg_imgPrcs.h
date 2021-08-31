@@ -59,7 +59,7 @@ public:
 	void HideAllTeachingDlg();
 	void InitTeachingTab();
 	int GetInspMode();
-	void OnDrawImage(CDlgItem::ViewData& viewdata);
+	void OnDrawROI(CDlgItem::ViewData& viewdata);
 
 	afx_msg void OnBnClickedBtnLoadImg();
 	afx_msg void OnMenuImgPrcs();
