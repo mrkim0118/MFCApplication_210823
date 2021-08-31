@@ -118,6 +118,64 @@ int CDlg_ImgPrcs::GetInspMode()
 	return m_iInspMode;
 }
 
+void CDlg_ImgPrcs::OnDrawImage(CDlgItem::ViewData& viewdata)
+{
+	// Picture Control DC를 생성.
+	// IDC_PC_IMAGE는 Picture Control의 Resource ID.
+
+	// Picture Control 크기를 얻는다.
+	CRect rect;
+	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&rect);
+
+	CWnd* pWnd = NULL;
+	pWnd = GetDlgItem(IDC_STATIC_SRC_VIEW);
+	CDC *pDCc = pWnd->GetDC();
+
+	CDC memDC;
+	CBitmap *pOldBitmap, bitmap;
+
+	// Picture Control DC에 호환되는 새로운 CDC를 생성. (임시 버퍼)
+	memDC.CreateCompatibleDC(viewdata.dc);
+	// Picture Control의 크기와 동일한 비트맵을 생성.
+	bitmap.CreateCompatibleBitmap(viewdata.dc, viewdata.rect.Width(), viewdata.rect.Height());
+	// 임시 버퍼에서 방금 생성한 비트맵을 선택하면서, 이전 비트맵을 보존.
+	pOldBitmap = memDC.SelectObject(&bitmap);
+
+	memDC.BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), viewdata.dc, 0, 0, SRCCOPY);
+	//memDC.BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), viewdata.dc, 0, 0, SRCCOPY);
+
+	CPen *pOldPen = NULL;
+	CBrush *pOldBrush = NULL;
+
+	CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));
+	CBrush brushRed;
+	brushRed.CreateStockObject(NULL_BRUSH);
+
+	pOldPen = memDC.SelectObject(&penRed);
+	pOldBrush = memDC.SelectObject(&brushRed);
+
+	memDC.Rectangle(m_ptRect_Start.x , m_ptRect_Start.y , m_ptRect_End.x , m_ptRect_End.y);
+
+	memDC.SelectObject(pOldPen);
+	memDC.SelectObject(pOldBrush);
+
+	// 임시 버퍼에 검은색으로 채움.
+	//memDC.PatBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), BLACKNESS);
+	// 임시 버퍼를 Picture Control에 그린다.
+	pDCc->BitBlt(0, 0, viewdata.rect.Width(), viewdata.rect.Height(), &memDC, 0, 0, SRCCOPY);
+
+	// 이전 비트맵으로 재설정.
+    memDC.SelectObject(pOldBitmap);
+
+	pOldBrush->DeleteObject();
+	pOldPen->DeleteObject();
+
+	// 생성한 리소스 해제.
+	memDC.DeleteDC();
+	bitmap.DeleteObject();
+	pWnd->ReleaseDC(pDCc);
+}
+
 
 BEGIN_MESSAGE_MAP(CDlg_ImgPrcs, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_LOAD_IMG, &CDlg_ImgPrcs::OnBnClickedBtnLoadImg)
@@ -191,11 +249,15 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_Cmb_Mode.AddString(_T("GrayHistogram"));
 	m_Cmb_Mode.SetCurSel(0);
 
+
 	m_ViewDataSrc.dc = new CClientDC(GetDlgItem(IDC_STATIC_SRC_VIEW));
 	m_ViewDataDst.dc = new CClientDC(GetDlgItem(IDC_STATIC_DST_VIEW));
 
 	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&m_ViewDataSrc.rect);
 	GetDlgItem(IDC_STATIC_DST_VIEW)->GetClientRect(&m_ViewDataDst.rect);
+	
+	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetWindowRect(&m_DlgRect);
+	ScreenToClient(&m_DlgRect);
 
 	m_ViewDataSrc.img = new Mat;
 	m_ViewDataDst.img = new Mat;
@@ -208,7 +270,6 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_pDlgItem->CreateBitMapInfo(m_ViewDataDst);
 
 	m_pDlgThreshold->ShowWindow(SW_SHOW);
-
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -399,23 +460,41 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 
 void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	m_ptRect_Start = point;
-	
+	if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
+		&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+	{
+		m_ptRect_Start = point;
+		m_bClicked = true;
+	}
 	CDialogEx::OnLButtonDown(nFlags, point);
 }
 
 
 void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	m_ptRect_End = point;
-
+	m_bClicked = false;
+	if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
+		&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+	{
+		m_ptRect_End = point;
+		OnDrawImage(m_ViewDataSrc);
+	}
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
 
 void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	int a = 1;
+	if (point.x > m_DlgRect.left && point.x < m_DlgRect.right
+		&& point.y > m_DlgRect.top && point.y < m_DlgRect.bottom)
+	{
+		if (m_bClicked == true)
+		{
+			m_ptRect_End = point;
+			OnDrawImage(m_ViewDataSrc);
+		}
+	}
+
+
 	CDialogEx::OnMouseMove(nFlags, point);
 }

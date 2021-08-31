@@ -71,4 +71,8 @@ void CDlgItem::InitViewData(CWnd * pWnd)
 
 	this->CreateBitMapInfo(this->m_ViewData_DstImg);
 	this->CreateBitMapInfo(this->m_ViewData_SrcImg);
+
+	//PatBlt(m_ViewData_DstImg.dc->GetSafeHdc(),0, 0, m_ViewData_DstImg.rect.Width(), m_ViewData_DstImg.rect.Height(), BLACKNESS);
+	//PatBlt(m_ViewData_SrcImg.dc->GetSafeHdc(), 0, 0, m_ViewData_SrcImg.rect.Width(), m_ViewData_SrcImg.rect.Height(), BLACKNESS);
+
 }

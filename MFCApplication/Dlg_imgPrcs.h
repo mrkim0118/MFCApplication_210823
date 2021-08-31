@@ -45,17 +45,21 @@ private:
 
 	CDlgItem::ViewData m_ViewDataSrc;
 	CDlgItem::ViewData m_ViewDataDst;
-	CDlgItem::ViewData m_ViewData_ThresholdTest;
 
 	int m_iInspMode;
 	CComboBox m_Cmb_Mode;
 	CPoint m_ptRect_Start;
 	CPoint m_ptRect_End;
+	CRect m_DlgRect;
+	CTabCtrl m_Teaching_Tab;
+	bool m_bClicked;
+
 public:
 
 	void HideAllTeachingDlg();
 	void InitTeachingTab();
 	int GetInspMode();
+	void OnDrawImage(CDlgItem::ViewData& viewdata);
 
 	afx_msg void OnBnClickedBtnLoadImg();
 	afx_msg void OnMenuImgPrcs();
@@ -63,15 +67,12 @@ public:
 	afx_msg void OnBnClickedBtnImgPrcsStart();
 	afx_msg void OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedBtnDstToSrc();
-	
-	virtual BOOL OnInitDialog();
-
-	CTabCtrl m_Teaching_Tab;
-	
 	afx_msg void OnBnClickedBtnDstToThresholdDlg();
 	afx_msg void OnPaint();
 	afx_msg void OnCbnSelchangeCmbMode();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+
+	virtual BOOL OnInitDialog();
 };
