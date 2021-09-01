@@ -25,14 +25,22 @@ protected:
 private:
 	unique_ptr<CDlgItem> m_pDlgItem;
 	unique_ptr<COpenCV> m_pOpenCV;
-public:
-
-	virtual BOOL OnInitDialog();
 
 	CComboBox m_Cmb_Morph_Operation;
 	CComboBox m_Cmb_Element_Shape;
 	CSliderCtrl m_Slider_Morph_Size;
 
+	int m_iEdit_Morph_AnchorX;
+	int m_iEdit_Morph_AnchorY;
+	int m_iEdit_Morph_Size_Value;
+	int m_iEdit_Element_AnchorX;
+	int m_iEdit_Element_AnchorY;
+
+	UINT m_iEdit_Element_Size;
+
+public:
+
+	virtual BOOL OnInitDialog();
 	afx_msg void OnEnChangeEditElementAnchorX();
 	afx_msg void OnEnChangeEditElementAnchorY();
 	afx_msg void OnEnChangeEditMorphologyAnchorX();
@@ -42,16 +50,14 @@ public:
 	afx_msg void OnEnChangeEditMorphSizeValue();
 	afx_msg LRESULT OnReceiveImg(WPARAM wParam, LPARAM lParam);
 
-
-	int m_iEdit_Element_AnchorX;
-	int m_iEdit_Element_AnchorY;
+	int GetMorphAnchorX();
+	int GetMorphAnchorY();
+	int GetElemetSIze();
+	int GetElementAnchorX();
+	int GetElementAnchorY();
 	int GetElementShape();
 	int GetMorphologyOperation();
-	int m_iEdit_Morph_AnchorX;
-	int m_iEdit_Morph_AnchorY;
-	int m_iEdit_Morph_Size_Value;
-
-	UINT m_iEdit_Element_Size;
-
 	void UpdateTestImg();
+
+
 };

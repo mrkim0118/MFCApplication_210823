@@ -254,7 +254,7 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 	return 0;
 }
 
-bool COpenCV::GetHistogramImg( Mat & Img , Mat &Dst)
+void COpenCV::GetHistogramImg( Mat & Img , Mat &Dst)
 {
 	CV_Assert(Img.type() == CV_32FC1);
 	CV_Assert(Img.size() == Size(1,256));

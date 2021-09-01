@@ -48,13 +48,14 @@ private:
 
 	int m_iInspMode;
 	CComboBox m_Cmb_Mode;
-	CPoint m_ptRect_Start;
-	CPoint m_ptRect_End;
+	CPoint m_ptROI_Start;
+	CPoint m_ptROI_End;
 	CRect m_DlgRect;
 	CTabCtrl m_Teaching_Tab;
 	bool m_bClicked;
 
 public:
+	virtual BOOL OnInitDialog();
 
 	void HideAllTeachingDlg();
 	void InitTeachingTab();
@@ -67,12 +68,12 @@ public:
 	afx_msg void OnBnClickedBtnImgPrcsStart();
 	afx_msg void OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedBtnDstToSrc();
-	afx_msg void OnBnClickedBtnDstToThresholdDlg();
+	afx_msg void OnBnClickedBtnDstToTeachingDlg();
 	afx_msg void OnPaint();
 	afx_msg void OnCbnSelchangeCmbMode();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 
-	virtual BOOL OnInitDialog();
+
 };

@@ -15,10 +15,16 @@ CDlg_Teaching_Template_Match::CDlg_Teaching_Template_Match(CWnd* pParent /*=NULL
 	: CDialogEx(IDD_DLG_TEMPLATE_MATCH, pParent)
 {
 	m_pDlgItem = make_unique<CDlgItem>();
+	m_pModelImg = new Mat();
 }
 
 CDlg_Teaching_Template_Match::~CDlg_Teaching_Template_Match()
 {
+	if (m_pModelImg != NULL)
+	{
+		delete m_pModelImg;
+		m_pModelImg = NULL;
+	}
 }
 
 void CDlg_Teaching_Template_Match::DoDataExchange(CDataExchange* pDX)
@@ -76,11 +82,91 @@ int CDlg_Teaching_Template_Match::GetTemplateMatchMethod()
 
 	return iMethod;
 }
+void CDlg_Teaching_Template_Match::CreateModelImg(Mat SrcImg, Mat& DstImg, CPoint ptStart, CPoint ptEnd, CRect rect)
+{
+	int iPoint_Left, iPoint_Right, iPoint_Top, iPoint_Bottom;
+
+	if (ptStart.x > ptEnd.x)
+	{
+		iPoint_Left = ptEnd.x;
+		iPoint_Right = ptStart.x;
+	}
+	else
+	{
+		iPoint_Left = ptStart.x;
+		iPoint_Right = ptEnd.x;
+	}
+
+	if (ptStart.y > ptEnd.y)
+	{
+		iPoint_Top = ptEnd.y;
+		iPoint_Bottom = ptStart.y;
+	}
+	else
+	{
+		iPoint_Top = ptStart.y;
+		iPoint_Bottom = ptEnd.y;
+	}
+
+	double rx = ((double)iPoint_Left / rect.right);
+	double rx2 = ((double)iPoint_Right / rect.right);
+
+	double ry = ((double)iPoint_Top / rect.bottom);
+	double ry2 = ((double)iPoint_Bottom / rect.bottom);
+
+	int iStartX = (int)SrcImg.cols*rx;
+	int IStartY = (int)SrcImg.rows*ry;
+
+	int iWidth = (int)(SrcImg.cols*rx2 - SrcImg.cols*rx);
+	int iHeight = (int)(SrcImg.rows*ry2 - SrcImg.rows*ry);
+
+	Rect ROI(iStartX, IStartY, iWidth, iHeight);
+	Mat rectimg = SrcImg(ROI);
+
+	//// Width 값 4의 배수로 맞추기.
+	int iModelSpanWidth = 0;
+
+	iModelSpanWidth = iWidth;
+	if (iModelSpanWidth % 4 != 0)
+	{
+		iModelSpanWidth = iWidth + (4 - iWidth % 4);
+	}
+	else
+	{
+		iModelSpanWidth = iWidth;
+	}
+
+	Mat newimg(iHeight, iModelSpanWidth, rectimg.type());
+
+	for (int j = 0; j < rectimg.rows; j++)
+	{
+		uchar *p = newimg.ptr<uchar>(j);
+		for (int i = 0; i < iModelSpanWidth; i++)
+		{
+			if (i >= rectimg.cols)
+			{
+				p[i * 3 + 0] = 0;
+				p[i * 3 + 1] = 0;
+				p[i * 3 + 2] = 0;
+			}
+			else
+			{
+				p[i * 3 + 0] = rectimg.at<uchar>(j, (i * 3 + 0));
+				p[i * 3 + 1] = rectimg.at<uchar>(j, (i * 3 + 1));
+				p[i * 3 + 2] = rectimg.at<uchar>(j, (i * 3 + 2));
+			}
+		}
+	}
+	DstImg = newimg.clone();
+
+}
 LRESULT CDlg_Teaching_Template_Match::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 {
 	m_pDlgItem->m_ViewData_SrcImg.img = (Mat*)lParam;
 	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
+
+	*m_pModelImg = m_pDlgItem->m_ViewData_SrcImg.img->clone();
 
 	return 0;
 }

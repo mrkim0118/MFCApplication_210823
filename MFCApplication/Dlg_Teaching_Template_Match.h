@@ -23,9 +23,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	unique_ptr<CDlgItem> m_pDlgItem;
+	Mat* m_pModelImg;
+	CComboBox m_Cmb_Method;
+
 public:
 	virtual BOOL OnInitDialog();
-	CComboBox m_Cmb_Method;
 	afx_msg LRESULT OnReceiveImg(WPARAM wParam, LPARAM lParam);
 	int GetTemplateMatchMethod();
+
+	void CreateModelImg(Mat SrcImg , Mat& DstImg, CPoint ptStart , CPoint ptEnd , CRect rect);
 };

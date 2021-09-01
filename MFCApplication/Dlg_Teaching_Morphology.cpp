@@ -50,9 +50,8 @@ BEGIN_MESSAGE_MAP(CDlg_Teaching_Morphology, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT_MORPHOLOGY_ANCHOR_X, &CDlg_Teaching_Morphology::OnEnChangeEditMorphologyAnchorX)
 	ON_EN_CHANGE(IDC_EDIT_MORPHOLOGY_ANCHOR_Y, &CDlg_Teaching_Morphology::OnEnChangeEditMorphologyAnchorY)
 	ON_EN_CHANGE(IDC_EDIT_ELEMENT_SIZE, &CDlg_Teaching_Morphology::OnEnChangeEditElementSize)
-	ON_WM_HSCROLL()
 	ON_EN_CHANGE(IDC_EDIT_MORPH_SIZE_VALUE, &CDlg_Teaching_Morphology::OnEnChangeEditMorphSizeValue)
-
+	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_MORPHOLOGY_TEST, OnReceiveImg)
 END_MESSAGE_MAP()
 
@@ -85,6 +84,7 @@ BOOL CDlg_Teaching_Morphology::OnInitDialog()
 	m_Slider_Morph_Size.SetPageSize(1);
 
 	m_iEdit_Morph_Size_Value = m_Slider_Morph_Size.GetPos();
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -250,4 +250,29 @@ LRESULT CDlg_Teaching_Morphology::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
 
 	return 0;
+}
+
+int CDlg_Teaching_Morphology::GetMorphAnchorX()
+{
+	return m_iEdit_Morph_AnchorX;
+}
+
+int CDlg_Teaching_Morphology::GetMorphAnchorY()
+{
+	return m_iEdit_Morph_AnchorY;
+}
+
+int CDlg_Teaching_Morphology::GetElemetSIze()
+{
+	return m_iEdit_Element_Size;
+}
+
+int CDlg_Teaching_Morphology::GetElementAnchorX()
+{
+	return m_iEdit_Element_AnchorX;
+}
+
+int CDlg_Teaching_Morphology::GetElementAnchorY()
+{
+	return m_iEdit_Element_AnchorY;
 }

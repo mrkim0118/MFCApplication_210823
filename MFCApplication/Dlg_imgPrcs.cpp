@@ -153,9 +153,9 @@ void CDlg_ImgPrcs::OnDrawROI(CDlgItem::ViewData& viewdata)
 	pOldPen = memDC.SelectObject(&penRed);
 	pOldBrush = memDC.SelectObject(&brushRed);
 
-	//memDC.Rectangle(m_ptRect_Start.x-30 , m_ptRect_Start.y-40 , m_ptRect_End.x-30 , m_ptRect_End.y-40);
-	memDC.Rectangle(m_ptRect_Start.x, m_ptRect_Start.y, m_ptRect_End.x, m_ptRect_End.y);
-	//memDC.Rectangle(CRect(m_ptRect_Start , m_ptRect_End));
+	//memDC.Rectangle(m_ptROI_Start.x-30 , m_ptROI_Start.y-40 , m_ptROI_End.x-30 , m_ptROI_End.y-40);
+	memDC.Rectangle(m_ptROI_Start.x, m_ptROI_Start.y, m_ptROI_End.x, m_ptROI_End.y);
+	//memDC.Rectangle(CRect(m_ptROI_Start , m_ptROI_End));
 	memDC.SelectObject(pOldPen);
 	memDC.SelectObject(pOldBrush);
 
@@ -184,7 +184,7 @@ BEGIN_MESSAGE_MAP(CDlg_ImgPrcs, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_IMG_PRCS_START, &CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TEACHING_TAB, &CDlg_ImgPrcs::OnTcnSelchangeTeachingTab)
 	ON_BN_CLICKED(IDC_BTN_DST_TO_SRC, &CDlg_ImgPrcs::OnBnClickedBtnDstToSrc)
-	ON_BN_CLICKED(IDC_BTN_DST_TO_THRESHOLD_DLG, &CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg)
+	ON_BN_CLICKED(IDC_BTN_DST_TO_THRESHOLD_DLG, &CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg)
 	ON_WM_PAINT()
 	ON_CBN_SELCHANGE(IDC_CMB_MODE, &CDlg_ImgPrcs::OnCbnSelchangeCmbMode)
 	ON_WM_LBUTTONDOWN()
@@ -288,12 +288,12 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	{
 		COpenCV::ElementParams tElementParams;
 		tElementParams.eShape = (MorphShapes)m_pDlgMorphology->GetElementShape();
-		tElementParams.anchor = Point(m_pDlgMorphology->m_iEdit_Element_AnchorX, m_pDlgMorphology->m_iEdit_Element_AnchorY);
-		tElementParams.ksize = Size(m_pDlgMorphology->m_iEdit_Element_Size , m_pDlgMorphology->m_iEdit_Element_Size);
+		tElementParams.anchor = Point(m_pDlgMorphology->GetElementAnchorX(), m_pDlgMorphology->GetElementAnchorY());
+		tElementParams.ksize = Size(m_pDlgMorphology->GetElemetSIze() , m_pDlgMorphology->GetElemetSIze());
 
 		COpenCV::MorphologyParams tMorphologyParams;
 		tMorphologyParams.eOperation = (MorphTypes)m_pDlgMorphology->GetMorphologyOperation();
-		tMorphologyParams.Anchor = Point(m_pDlgMorphology->m_iEdit_Morph_AnchorX, m_pDlgMorphology->m_iEdit_Morph_AnchorY);
+		tMorphologyParams.Anchor = Point(m_pDlgMorphology->GetMorphAnchorX() , m_pDlgMorphology->GetMorphAnchorY());
 		tMorphologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 
 		m_pOpenCV->Morphology(*m_ViewDataSrc.img, *m_ViewDataDst.img, tMorphologyParams, tElementParams);
@@ -391,7 +391,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToSrc()
 }
 
 
-void CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg()
+void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 {
 	m_iInspMode = GetInspMode();
 
@@ -419,70 +419,8 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToThresholdDlg()
 	{
 		if (m_pDlgTemplateMatch != NULL)
 		{
-			Mat img;
-			img = m_ViewDataSrc.img->clone();
+			m_pDlgTemplateMatch->CreateModelImg(*m_ViewDataSrc.img, *m_pMessageImg, m_ptROI_Start, m_ptROI_End, m_ViewDataSrc.rect);
 
-			double dRectWidth = m_ViewDataSrc.rect.Width();
-			double dRectHeight = m_ViewDataSrc.rect.Height();
-
-			double dResolutionX = dRectWidth / img.rows;
-			double dResolutionY = dRectHeight / img.cols;
-
-			int iModelWidth = m_ptRect_End.x - m_ptRect_Start.x;
-			int iModelHeight = m_ptRect_End.y - m_ptRect_Start.y;
-
-			double rx = ((double)m_ptRect_Start.x / m_ViewDataSrc.rect.right);
-			double rx2 =((double)m_ptRect_End.x / m_ViewDataSrc.rect.right);
-
-			double ry = ((double)m_ptRect_Start.y / m_ViewDataSrc.rect.bottom);
-			double ry2 = ((double)m_ptRect_End.y / m_ViewDataSrc.rect.bottom);
-
-
-
-			//int iModelSpanWidth = 0;
-
-			//if (iModelSpanWidth % 4 != 0)
-			//{
-			//	iModelSpanWidth = iModelWidth + (4 - iModelWidth % 4);
-			//}
-			//else
-			//{
-			//	iModelSpanWidth = iModelWidth;
-			//}
-
-			////m_pModelImage[eModel] = new BYTE[nModelSpanWidth * nModelHeight];
-			////ZeroMemory(m_pModelImage[eModel], nModelSpanWidth * nModelHeight);
-
-			//Mat newimg;
-			//newimg.zeros(iModelSpanWidth, iModelHeight, CV_8UC1);
-
-			//for (int j = 0; j<iModelHeight; j++)
-			//{
-			//	for (int i = 0; i<iModelSpanWidth; i++)
-			//	{
-			//		if (i >= iModelWidth)
-			//		{
-			//			newimg.at<uchar>(j, iModelSpanWidth*i) = 0;
-			//			//m_pModelImage[eModel][j * nModelSpanWidth + i] = 0;
-			//		}
-			//		else
-			//		{
-			//			newimg.at<uchar>(j, iModelSpanWidth+i) = img.at<uchar>((m_ptRect_Start.y *dRectWidth) , (j*dRectWidth) + m_ptRect_Start.x+i) ;
-			//			//m_pModelImage[eModel][j * nModelSpanWidth + i] = pImgSrc[(nStartY * nImgWidth) + (j * nImgWidth) + nStartX + i];
-			//		}
-			//	}
-			//}
-
-
-
-			Rect rect(img.rows*rx, img.cols*ry, (img.rows*rx2 - img.rows*rx), (img.cols*ry2 - img.cols*ry));
-			//img(Rect(m_ptRect_Start.x*dResolutionX, m_ptRect_Start.y*dResolutionY, (m_ptRect_End.x - m_ptRect_Start.x)*dResolutionX, (m_ptRect_End.y - m_ptRect_Start.y)*dResolutionY));
-			Mat rectimg = img(rect);
-			imshow("TEST", rectimg);
-
-			*m_pMessageImg = rectimg.clone();
-			//Rect Crop(m_ptRect_Start.x, m_ptRect_Start.y, m_ptRect_End.x, m_ptRect_End.y);
-			//*m_pMessageImg = m_ViewDataSrc.img->clone();  (Crop);
 			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_TEST, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
@@ -532,7 +470,7 @@ void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
 			point.x = point.x - m_DlgRect.left;
 			point.y = point.y - m_DlgRect.top;
 
-			m_ptRect_Start = point;
+			m_ptROI_Start = point;
 			m_bClicked = true;
 		}
 	}
@@ -549,7 +487,7 @@ void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y = point.y - m_DlgRect.top;
 
 			m_bClicked = false;
-			m_ptRect_End = point;
+			m_ptROI_End = point;
 			OnDrawROI(m_ViewDataSrc);
 		}
 	}
@@ -566,7 +504,7 @@ void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 
 		if (m_bClicked == true)
 		{
-			m_ptRect_End = point;
+			m_ptROI_End = point;
 			OnDrawROI(m_ViewDataSrc);
 		}
 	}

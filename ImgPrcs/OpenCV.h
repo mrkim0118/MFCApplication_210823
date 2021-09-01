@@ -90,7 +90,7 @@ public:
     Mat LoadImg(String strImgPath, ImreadModes eMode = IMREAD_COLOR);
 	bool Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg);
 	bool Histogram(InputArray SrcImg, Mat& DstImg);
-	bool GetHistogramImg(Mat & Img, Mat &imgHist);
+	void GetHistogramImg(Mat & Img, Mat &imgHist);
 	bool ThresHold_Adaptive(InputArray SrcImg , Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams);
 	bool ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &ThresHoldParams);
 	bool Morphology(InputArray SrcImg , Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams);

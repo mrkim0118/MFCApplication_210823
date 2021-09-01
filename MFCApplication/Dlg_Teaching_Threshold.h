@@ -32,26 +32,24 @@ private:
 	UINT m_iEdit_Adp_C;
 	UINT m_iEdit_Threshold;
 
-
-public:
-
-	virtual BOOL OnInitDialog();
-
 	CComboBox m_Cmb_Adp_Method;
 	CComboBox m_Cmb_Adp_Type;
 	CComboBox m_Cmb_Method;
 	CButton m_Chk_Adaptive_Use;
 	CSliderCtrl m_Slider_Threshold;
 
+public:
+
+	virtual BOOL OnInitDialog();
+
 	afx_msg void OnEnChangeEditAdaptiveBlockSize();
 	afx_msg void OnEnChangeEditAdaptiveC();
-	afx_msg void OnCbnSelchangeCmbMethod();
 	afx_msg void OnEnChangeEditThreshold();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnEnChangeEditThresholdVal();
 	afx_msg void OnPaint();
-
 	afx_msg LRESULT OnReceiveImg(WPARAM wParam , LPARAM lParam);
+
 	int GetThreshold();
 	int GetAdaptiveC();
 	int GetAdaptive_BlockSize();
@@ -59,5 +57,6 @@ public:
 	int GetAdpThresholdType();
 	int GetAdpThresholdMethod();
 	int m_iEdit_Threshold_Value;
+
 	void UpdateTestImg();
 };
