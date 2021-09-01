@@ -35,7 +35,9 @@ void CDlg_Teaching_Template_Match::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CDlg_Teaching_Template_Match, CDialogEx)
-	ON_MESSAGE(WM_TEMPLATE_MATCH_TEST, OnReceiveImg)
+	ON_MESSAGE(WM_TEMPLATE_MATCH_MODEL, OnReceiveImg)
+	ON_MESSAGE(WM_TEMPLATE_MATCH_NORM, OnReceiveNorm)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -46,8 +48,9 @@ BOOL CDlg_Teaching_Template_Match::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	m_pDlgItem->m_pWnd = GetDlgItem((IDC_STATIC_TEMPLATE_MODEL));
-	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd);
+	m_pDlgItem->m_pWnd = GetDlgItem(IDC_STATIC_TEMPLATE_MODEL);
+	m_pDlgItem->m_pWnd_Ext = GetDlgItem(IDC_STATIC_TEMPLATE_NORMALIZE);
+	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd , m_pDlgItem->m_pWnd_Ext);
 
 	m_Cmb_Method.AddString(_T("TM_SQDIFF"));
 	m_Cmb_Method.AddString(_T("TM_SQDIFF_NORMED"));
@@ -81,6 +84,10 @@ int CDlg_Teaching_Template_Match::GetTemplateMatchMethod()
 		iMethod = TemplateMatchModes::TM_CCOEFF_NORMED;
 
 	return iMethod;
+}
+Mat CDlg_Teaching_Template_Match::GetModelImg()
+{
+	return *m_pModelImg;
 }
 void CDlg_Teaching_Template_Match::CreateModelImg(Mat SrcImg, Mat& DstImg, CPoint ptStart, CPoint ptEnd, CRect rect)
 {
@@ -162,11 +169,27 @@ void CDlg_Teaching_Template_Match::CreateModelImg(Mat SrcImg, Mat& DstImg, CPoin
 }
 LRESULT CDlg_Teaching_Template_Match::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 {
-	m_pDlgItem->m_ViewData_SrcImg.img = (Mat*)lParam;
+	Mat *img = (Mat*)lParam;
+	*m_pDlgItem->m_ViewData_SrcImg.img = img->clone();
 	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
 
 	*m_pModelImg = m_pDlgItem->m_ViewData_SrcImg.img->clone();
 
 	return 0;
+}
+
+LRESULT CDlg_Teaching_Template_Match::OnReceiveNorm(WPARAM wParam, LPARAM lParam)
+{
+	m_pDlgItem->m_ViewData_DstImg.img = (Mat*)lParam;
+	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	return 0;
+}
+
+void CDlg_Teaching_Template_Match::OnPaint()
+{
+	CPaintDC dc(this);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
 }

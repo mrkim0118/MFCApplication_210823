@@ -14,6 +14,7 @@ typedef vector<vector<Point>> ContoursType;
 #define SCALAR_COLOR_BLACK Scalar(0,0,0)
 #define SCALAR_COLOR_YELLOW Scalar(0,255,255)
 #define SCALAR_COLOR_RED Scalar(0,0,255)
+#define SCALAR_COLOR_LIGHT_SKY Scalar(234,255,18)
 
 class COpenCV
 {
@@ -80,6 +81,7 @@ public:
 	struct TemplateMatchParams
 	{
 		Mat Model;
+		Mat Normalize;
 		TemplateMatchModes eTemplateMatchModes = TM_CCOEFF_NORMED;
 	};
 
@@ -90,13 +92,13 @@ public:
     Mat LoadImg(String strImgPath, ImreadModes eMode = IMREAD_COLOR);
 	bool Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg);
 	bool Histogram(InputArray SrcImg, Mat& DstImg);
-	void GetHistogramImg(Mat & Img, Mat &imgHist);
 	bool ThresHold_Adaptive(InputArray SrcImg , Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams);
 	bool ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &ThresHoldParams);
 	bool Morphology(InputArray SrcImg , Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams);
-	bool TemplateMatching(InputArray SrcImg, Mat& DstImg, Mat Model, TemplateMatchModes eTemplateMatchModes);
+	bool TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchParams tTemplateMatchParams , Mat& Normalize);
 	int Labeling(InputArray SrcImg , Mat& DstImg, LabelingParams &tLabelingParams);
 	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
+	void GetHistogramImg(Mat & Img, Mat &imgHist);
 
 };
 

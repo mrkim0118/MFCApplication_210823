@@ -38,6 +38,8 @@ private:
 	CButton m_Chk_Adaptive_Use;
 	CSliderCtrl m_Slider_Threshold;
 
+	int m_iEdit_Threshold_Value;
+
 public:
 
 	virtual BOOL OnInitDialog();
@@ -56,7 +58,7 @@ public:
 	int GetThresholdMethod();
 	int GetAdpThresholdType();
 	int GetAdpThresholdMethod();
-	int m_iEdit_Threshold_Value;
+	int GetAdaptiveUse();
 
 	void UpdateTestImg();
 };

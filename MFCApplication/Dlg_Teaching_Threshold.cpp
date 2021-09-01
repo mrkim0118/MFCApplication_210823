@@ -177,6 +177,11 @@ int CDlg_Teaching_Threshold::GetAdpThresholdMethod()
 
 }
 
+int CDlg_Teaching_Threshold::GetAdaptiveUse()
+{
+	return m_Chk_Adaptive_Use.GetCheck();
+}
+
 void CDlg_Teaching_Threshold::UpdateTestImg()
 {
 	COpenCV::ThresHoldParams tThresholdParams;

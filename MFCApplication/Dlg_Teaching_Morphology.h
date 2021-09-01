@@ -60,4 +60,5 @@ public:
 	void UpdateTestImg();
 
 
+	afx_msg void OnPaint();
 };

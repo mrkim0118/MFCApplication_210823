@@ -302,7 +302,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	case CImgPrcs::MODE_THRESHOLD_:
 	{
 		
-		if (m_pDlgThreshold->m_Chk_Adaptive_Use.GetCheck() == TRUE)
+		if (m_pDlgThreshold->GetAdaptiveUse() == TRUE)
 		{
 			COpenCV::AdaptiveThresHoldParams tAdaptiveThresHoldParams;
 			tAdaptiveThresHoldParams.eMethod = (AdaptiveThresholdTypes)m_pDlgThreshold->GetAdpThresholdMethod();
@@ -344,7 +344,13 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	case CImgPrcs::MODE_TEMPLATE_MATCH_:
 	{
 		COpenCV::TemplateMatchParams tTemplateMatchParams;
-		m_pOpenCV->TemplateMatching(*m_ViewDataDst.img, *m_ViewDataDst.img, tTemplateMatchParams.Model, tTemplateMatchParams.eTemplateMatchModes);
+		tTemplateMatchParams.Model = m_pDlgTemplateMatch->GetModelImg();
+		tTemplateMatchParams.eTemplateMatchModes = (TemplateMatchModes)m_pDlgTemplateMatch->GetTemplateMatchMethod();
+		m_pOpenCV->TemplateMatching(*m_ViewDataSrc.img, *m_ViewDataDst.img, tTemplateMatchParams , tTemplateMatchParams.Normalize);
+
+		*m_pMessageImg = tTemplateMatchParams.Normalize.clone();
+		::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_NORM, NULL, (LPARAM)m_pMessageImg);
+		break;
 	}
 	}
 
@@ -420,8 +426,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 		if (m_pDlgTemplateMatch != NULL)
 		{
 			m_pDlgTemplateMatch->CreateModelImg(*m_ViewDataSrc.img, *m_pMessageImg, m_ptROI_Start, m_ptROI_End, m_ViewDataSrc.rect);
-
-			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_TEST, NULL, (LPARAM)m_pMessageImg);
+			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_MODEL, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
 	}

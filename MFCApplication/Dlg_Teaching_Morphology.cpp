@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CDlg_Teaching_Morphology, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT_MORPH_SIZE_VALUE, &CDlg_Teaching_Morphology::OnEnChangeEditMorphSizeValue)
 	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_MORPHOLOGY_TEST, OnReceiveImg)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -275,4 +276,11 @@ int CDlg_Teaching_Morphology::GetElementAnchorX()
 int CDlg_Teaching_Morphology::GetElementAnchorY()
 {
 	return m_iEdit_Element_AnchorY;
+}
+
+
+void CDlg_Teaching_Morphology::OnPaint()
+{
+	CPaintDC dc(this);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
 }

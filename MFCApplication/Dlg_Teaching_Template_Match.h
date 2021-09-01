@@ -29,7 +29,10 @@ private:
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg LRESULT OnReceiveImg(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReceiveNorm(WPARAM wParam, LPARAM lParam);
 	int GetTemplateMatchMethod();
+	Mat GetModelImg();
 
 	void CreateModelImg(Mat SrcImg , Mat& DstImg, CPoint ptStart , CPoint ptEnd , CRect rect);
+	afx_msg void OnPaint();
 };

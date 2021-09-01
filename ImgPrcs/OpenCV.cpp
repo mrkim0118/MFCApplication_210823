@@ -325,21 +325,21 @@ bool COpenCV::Morphology(InputArray SrcImg, Mat& DstImg, MorphologyParams &tMorP
 	return true;
 }
 
-bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, Mat Model, TemplateMatchModes eTemplateMatchModes)
+bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchParams tTemplateMatchParams , Mat& Normalize)
 {
 	Mat mSrc = SrcImg.getMat();
-	Mat Result , Result_Norm;
+	Mat Result;
 	if (CheckImg(mSrc) == true)
 	{
-		matchTemplate(mSrc, Model, Result, eTemplateMatchModes);
-		normalize(Result, Result_Norm, 0, 255, NORM_MINMAX, CV_8U);
+		matchTemplate(mSrc, tTemplateMatchParams.Model, Result, tTemplateMatchParams.eTemplateMatchModes);
+		normalize(Result, Normalize, 0, 255, NORM_MINMAX, CV_8U);
 
 		double dMax = 0.0;
 		Point MaxLoc;
 
 		minMaxLoc(Result, 0 ,&dMax, 0 , &MaxLoc);
-
-		rectangle(mSrc, Rect(MaxLoc.x, MaxLoc.y, Model.cols, Model.rows), Scalar(0, 0, 255), 2);
+		DstImg =  mSrc.clone();
+		rectangle(DstImg, Rect(MaxLoc.x, MaxLoc.y, tTemplateMatchParams.Model.cols, tTemplateMatchParams.Model.rows), SCALAR_COLOR_LIGHT_SKY, 2);
 	}
 	return true;
 }

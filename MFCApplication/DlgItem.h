@@ -13,7 +13,7 @@ public:
 		BITMAPINFO *BitMapInfo;
 	};
 	CWnd * m_pWnd;
-	
+	CWnd * m_pWnd_Ext = NULL;
 
 	ViewData m_ViewData_SrcImg;
 	ViewData m_ViewData_DstImg;
@@ -21,6 +21,6 @@ public:
 	void CreateBitMapInfo(ViewData &View);
 	void DrawImage(ViewData &View);
 
-	void InitViewData(CWnd* pWnd);
+	void InitViewData(CWnd* pWnd , CWnd* pWnd_Ext = NULL);
 };
 
