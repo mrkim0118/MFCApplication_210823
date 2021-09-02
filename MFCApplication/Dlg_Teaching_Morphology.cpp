@@ -191,7 +191,7 @@ void CDlg_Teaching_Morphology::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pS
 
 		m_iEdit_Morph_Size_Value = m_Slider_Morph_Size.GetPos();
 
-		if (m_pDlgItem->m_ViewData_SrcImg.img->empty() != TRUE)
+		if (m_pDlgItem->m_ViewData_Src.img->empty() != TRUE)
 		{
 			UpdateTestImg();
 		}
@@ -218,7 +218,7 @@ void CDlg_Teaching_Morphology::OnEnChangeEditMorphSizeValue()
 
 	m_Slider_Morph_Size.SetPos(m_iEdit_Morph_Size_Value);
 
-	if (m_pDlgItem->m_ViewData_SrcImg.img != NULL)
+	if (m_pDlgItem->m_ViewData_Src.img != NULL)
 	{
 		UpdateTestImg();
 	}
@@ -238,17 +238,15 @@ void CDlg_Teaching_Morphology::UpdateTestImg()
 	tMorphologyParams.Anchor = Point(m_iEdit_Morph_AnchorX, m_iEdit_Morph_AnchorY);
 	tMorphologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 
-	m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_SrcImg.img, *m_pDlgItem->m_ViewData_DstImg.img, tMorphologyParams, tElementParams);
+	m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tMorphologyParams, tElementParams);
 
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Dst);
 }
 
 LRESULT CDlg_Teaching_Morphology::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 {
-	m_pDlgItem->m_ViewData_SrcImg.img = (Mat*)lParam;
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
+	m_pDlgItem->m_ViewData_Src.img = (Mat*)lParam;
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Src);
 
 	return 0;
 }
@@ -282,5 +280,5 @@ int CDlg_Teaching_Morphology::GetElementAnchorY()
 void CDlg_Teaching_Morphology::OnPaint()
 {
 	CPaintDC dc(this);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
 }

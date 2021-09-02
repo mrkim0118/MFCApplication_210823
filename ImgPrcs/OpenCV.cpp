@@ -276,9 +276,9 @@ bool COpenCV::ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &tThresH
 	Mat mSrc = SrcImg.getMat();
 	if (CheckImg(mSrc) == true)
 	{
-		if (mSrc.type() != CV_8UC1)
+		if (SrcImg.channels() != 1)
 		{
-			//mSrc.convertTo(mSrc, CV_8UC1);
+			//rgb = bgr[:, : , :: - 1]
 			cvtColor(mSrc, mSrc, COLOR_RGB2GRAY);
 		}
 		threshold(mSrc, DstImg, tThresHoldParams.iThreshold,tThresHoldParams.iMaxValue, tThresHoldParams.eType);
@@ -296,9 +296,8 @@ bool COpenCV::ThresHold_Adaptive(InputArray SrcImg, Mat& DstImg, AdaptiveThresHo
 	Mat mSrc = SrcImg.getMat();
 	if (CheckImg(mSrc) == true)
 	{
-		if (mSrc.type() != CV_8UC1)
+		if (SrcImg.channels() != 1)
 		{
-			//mSrc.convertTo(mSrc, CV_8UC1);
 			cvtColor(mSrc, mSrc, COLOR_RGB2GRAY);
 		}
 		adaptiveThreshold(mSrc, DstImg, tAdaptiveThresHoldParams.iMaxValue, tAdaptiveThresHoldParams.eMethod, tAdaptiveThresHoldParams.eType, tAdaptiveThresHoldParams.iBlockSize, tAdaptiveThresHoldParams.iC);
@@ -315,6 +314,11 @@ bool COpenCV::Morphology(InputArray SrcImg, Mat& DstImg, MorphologyParams &tMorP
 	Mat mSrc = SrcImg.getMat();
 	if (CheckImg(mSrc) == true)
 	{
+		if (SrcImg.channels() != 1)
+		{
+			cvtColor(mSrc, mSrc, COLOR_RGB2GRAY);
+		}
+
 		tMorPhologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 		morphologyEx(mSrc, DstImg, tMorPhologyParams.eOperation, tMorPhologyParams.Kernel, tMorPhologyParams.Anchor, tMorPhologyParams.iIterator, tMorPhologyParams.eBorderType, tMorPhologyParams.borderValue);
 	}
@@ -339,6 +343,8 @@ bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchPar
 
 		minMaxLoc(Result, 0 ,&dMax, 0 , &MaxLoc);
 		DstImg =  mSrc.clone();
+		string strResult = format("Result Max : %.3f", dMax);
+		putText(DstImg, strResult, Point(DstImg.cols*0.05, DstImg.rows*0.05), FONT_HERSHEY_DUPLEX, 0.7, SCALAR_COLOR_LIGHT_SKY, 2);
 		rectangle(DstImg, Rect(MaxLoc.x, MaxLoc.y, tTemplateMatchParams.Model.cols, tTemplateMatchParams.Model.rows), SCALAR_COLOR_LIGHT_SKY, 2);
 	}
 	return true;

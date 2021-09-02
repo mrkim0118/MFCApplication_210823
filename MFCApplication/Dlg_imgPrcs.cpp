@@ -19,39 +19,11 @@ IMPLEMENT_DYNAMIC(CDlg_ImgPrcs, CDialogEx)
 CDlg_ImgPrcs::CDlg_ImgPrcs(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_IMG_PRCS, pParent)
 {
-	m_pOpenCV = make_unique<COpenCV>();
-	m_pDlgItem = make_unique<CDlgItem>();
 }
 
 CDlg_ImgPrcs::~CDlg_ImgPrcs()
 {
 
-	if (m_ViewDataSrc.img != NULL)
-	{
-		delete m_ViewDataSrc.img;
-		m_ViewDataSrc.img = NULL;
-	}
-	if (m_ViewDataDst.img != NULL)
-	{
-		delete m_ViewDataDst.img;
-		m_ViewDataDst.img = NULL;
-	}
-	if (m_ViewDataSrc.dc != NULL)
-	{
-		delete m_ViewDataSrc.dc;
-		m_ViewDataSrc.dc = NULL;
-	}
-	if (m_ViewDataDst.dc != NULL)
-	{
-		delete m_ViewDataDst.dc;
-		m_ViewDataDst.dc = NULL;
-	}
-
-	if (m_pDlgThreshold != NULL)
-	{
-		delete m_pDlgThreshold;
-		m_pDlgThreshold = NULL;
-	}
 }
 
 void CDlg_ImgPrcs::DoDataExchange(CDataExchange* pDX)
@@ -78,17 +50,17 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	CRect rect;
 	m_Teaching_Tab.GetWindowRect(&rect);
 
-	m_pDlgThreshold = new CDlg_Teaching_Threshold;
+	m_pDlgThreshold = make_unique<CDlg_Teaching_Threshold>();
 	m_pDlgThreshold->Create(IDD_DLG_THRESHOLD, &m_Teaching_Tab);
 	m_pDlgThreshold->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgThreshold->ShowWindow(SW_HIDE);
 
-	m_pDlgMorphology = new CDlg_Teaching_Morphology;
+	m_pDlgMorphology = make_unique<CDlg_Teaching_Morphology>();
 	m_pDlgMorphology->Create(IDD_DLG_MORPHOLOGY, &m_Teaching_Tab);
 	m_pDlgMorphology->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgMorphology->ShowWindow(SW_HIDE);
 
-	m_pDlgTemplateMatch = new CDlg_Teaching_Template_Match;
+	m_pDlgTemplateMatch = make_unique<CDlg_Teaching_Template_Match>();
 	m_pDlgTemplateMatch->Create(IDD_DLG_TEMPLATE_MATCH, &m_Teaching_Tab);
 	m_pDlgTemplateMatch->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
@@ -136,7 +108,7 @@ void CDlg_ImgPrcs::OnDrawROI(CDlgItem::ViewData& viewdata)
 	CPen *pOldPen = NULL;
 	CBrush *pOldBrush = NULL;
 
-	CPen penRed(PS_SOLID, 1, RGB(255, 0, 0));
+	CPen penRed(PS_SOLID, 2, RGB(255, 0, 0));
 	CBrush brushRed;
 	brushRed.CreateStockObject(NULL_BRUSH);
 
@@ -206,9 +178,9 @@ void CDlg_ImgPrcs::OnBnClickedBtnLoadImg()
 		CT2CA pszString(path);
 		string strPath(pszString);
 
-		*m_ViewDataSrc.img =  m_pOpenCV->LoadImg(strPath);
-		m_pDlgItem->CreateBitMapInfo(m_ViewDataSrc);
-		m_pDlgItem->DrawImage(m_ViewDataSrc);
+		*m_pDlgItem->m_ViewData_Src.img =  m_pOpenCV->LoadImg(strPath);
+		
+		m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Src);
 	}
 }
 
@@ -230,7 +202,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnSaveImg()
 		CString path = fileDlg.GetPathName();
 		CT2CA pszString(path);
 		string strPath(pszString);
-		m_pOpenCV->SaveImg(strPath, *m_ViewDataDst.img);
+		m_pOpenCV->SaveImg(strPath, *m_pDlgItem->m_ViewData_Dst.img);
 	}
 }
 
@@ -239,38 +211,27 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	m_pOpenCV = make_unique<COpenCV>();
+	m_pDlgItem = make_unique<CDlgItem>();
+	m_pMessageImg = new Mat;
+
 	InitTeachingTab();
 
-	m_Cmb_Mode.AddString(_T("Morphorogy"));
+	m_Cmb_Mode.AddString(_T("Threshold")); 
 	m_Cmb_Mode.AddString(_T("Mask"));
-	m_Cmb_Mode.AddString(_T("Threshold"));
+	m_Cmb_Mode.AddString(_T("Morphorogy"));
 	m_Cmb_Mode.AddString(_T("Labeling"));
 	m_Cmb_Mode.AddString(_T("Contour"));
 	m_Cmb_Mode.AddString(_T("GrayHistogram"));
 	m_Cmb_Mode.AddString(_T("TemplateMatch"));
 	m_Cmb_Mode.SetCurSel(0);
 
-
-	m_ViewDataSrc.dc = new CClientDC(GetDlgItem(IDC_STATIC_SRC_VIEW));
-	m_ViewDataDst.dc = new CClientDC(GetDlgItem(IDC_STATIC_DST_VIEW));
-
-	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&m_ViewDataSrc.rect);
-	GetDlgItem(IDC_STATIC_DST_VIEW)->GetClientRect(&m_ViewDataDst.rect);
-	
-	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetWindowRect(&m_DlgRect);
-	ScreenToClient(&m_DlgRect);
-
-	m_ViewDataSrc.img = new Mat;
-	m_ViewDataDst.img = new Mat;
-	m_pMessageImg = new Mat;
-
-	m_ViewDataSrc.BitMapInfo = NULL;
-	m_ViewDataDst.BitMapInfo = NULL;
-
-	m_pDlgItem->CreateBitMapInfo(m_ViewDataSrc);
-	m_pDlgItem->CreateBitMapInfo(m_ViewDataDst);
-
+	m_pDlgItem->m_pWnd = GetDlgItem(IDC_STATIC_SRC_VIEW);
+	m_pDlgItem->m_pWnd_Ext = GetDlgItem(IDC_STATIC_DST_VIEW);
+	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd, m_pDlgItem->m_pWnd_Ext);
 	m_pDlgThreshold->ShowWindow(SW_SHOW);
+
+	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&m_DlgRect);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -296,7 +257,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		tMorphologyParams.Anchor = Point(m_pDlgMorphology->GetMorphAnchorX() , m_pDlgMorphology->GetMorphAnchorY());
 		tMorphologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 
-		m_pOpenCV->Morphology(*m_ViewDataSrc.img, *m_ViewDataDst.img, tMorphologyParams, tElementParams);
+		m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tMorphologyParams, tElementParams);
 		break;
 	}
 	case CImgPrcs::MODE_THRESHOLD_:
@@ -310,7 +271,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 			tAdaptiveThresHoldParams.iBlockSize = m_pDlgThreshold->GetAdaptive_BlockSize();
 			tAdaptiveThresHoldParams.iC = m_pDlgThreshold->GetAdaptiveC();
 
-			m_pOpenCV->ThresHold_Adaptive(*m_ViewDataSrc.img, *m_ViewDataDst.img, tAdaptiveThresHoldParams);
+			m_pOpenCV->ThresHold_Adaptive(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tAdaptiveThresHoldParams);
 		}
 		else
 		{
@@ -318,7 +279,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 			tThresHoldParams.eType = (ThresholdTypes)m_pDlgThreshold->GetThresholdMethod();
 			tThresHoldParams.iThreshold = m_pDlgThreshold->GetThreshold();
 
-			m_pOpenCV->ThresHold(*m_ViewDataSrc.img, *m_ViewDataDst.img, tThresHoldParams);
+			m_pOpenCV->ThresHold(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tThresHoldParams);
 		}
 		break;
 	}
@@ -327,18 +288,18 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	case CImgPrcs::MODE_LABELING_:
 	{
 		COpenCV::LabelingParams tLabelingParams;
-		m_pOpenCV->Labeling(*m_ViewDataDst.img, *m_ViewDataDst.img, tLabelingParams);
+		m_pOpenCV->Labeling(*m_pDlgItem->m_ViewData_Dst.img, *m_pDlgItem->m_ViewData_Dst.img, tLabelingParams);
 		break;
 	}
 	case CImgPrcs::MODE_CONTOUR_:
 	{
 		COpenCV::ContourParams tContourParams;
-		m_pOpenCV->Contour(*m_ViewDataDst.img, *m_ViewDataDst.img, tContourParams);
+		m_pOpenCV->Contour(*m_pDlgItem->m_ViewData_Dst.img, *m_pDlgItem->m_ViewData_Dst.img, tContourParams);
 		break;
 	}
 	case CImgPrcs::MODE_HISTOGRAM_:
 	{
-		m_pOpenCV->Histogram(*m_ViewDataSrc.img, *m_ViewDataDst.img);
+		m_pOpenCV->Histogram(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img);
 		break;
 	}
 	case CImgPrcs::MODE_TEMPLATE_MATCH_:
@@ -346,7 +307,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		COpenCV::TemplateMatchParams tTemplateMatchParams;
 		tTemplateMatchParams.Model = m_pDlgTemplateMatch->GetModelImg();
 		tTemplateMatchParams.eTemplateMatchModes = (TemplateMatchModes)m_pDlgTemplateMatch->GetTemplateMatchMethod();
-		m_pOpenCV->TemplateMatching(*m_ViewDataSrc.img, *m_ViewDataDst.img, tTemplateMatchParams , tTemplateMatchParams.Normalize);
+		m_pOpenCV->TemplateMatching(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tTemplateMatchParams , tTemplateMatchParams.Normalize);
 
 		*m_pMessageImg = tTemplateMatchParams.Normalize.clone();
 		::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_NORM, NULL, (LPARAM)m_pMessageImg);
@@ -354,9 +315,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	}
 	}
 
-
-	m_pDlgItem->CreateBitMapInfo(m_ViewDataDst);
-	m_pDlgItem->DrawImage(m_ViewDataDst);
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Dst);
 }
 
 
@@ -391,9 +350,10 @@ void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CDlg_ImgPrcs::OnBnClickedBtnDstToSrc()
 {
-	*m_ViewDataSrc.img = m_ViewDataDst.img->clone();
-	m_pDlgItem->CreateBitMapInfo(m_ViewDataSrc);
-	m_pDlgItem->DrawImage(m_ViewDataSrc);
+	*m_pDlgItem->m_ViewData_Src.img = m_pDlgItem->m_ViewData_Dst.img->clone();
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Src);
+
+
 }
 
 
@@ -407,7 +367,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 	{
 		if (m_pDlgThreshold != NULL)
 		{
-			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			*m_pMessageImg = m_pDlgItem->m_ViewData_Src.img->clone();
 			::SendMessage(m_pDlgThreshold->GetSafeHwnd(), WM_THRESHOLD_TEST, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
@@ -416,7 +376,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 	{
 		if (m_pDlgMorphology != NULL)
 		{
-			*m_pMessageImg = m_ViewDataSrc.img->clone();
+			*m_pMessageImg = m_pDlgItem->m_ViewData_Src.img->clone();
 			::SendMessage(m_pDlgMorphology->GetSafeHwnd(), WM_MORPHOLOGY_TEST, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
@@ -425,7 +385,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 	{
 		if (m_pDlgTemplateMatch != NULL)
 		{
-			m_pDlgTemplateMatch->CreateModelImg(*m_ViewDataSrc.img, *m_pMessageImg, m_ptROI_Start, m_ptROI_End, m_ViewDataSrc.rect);
+			m_pDlgTemplateMatch->CreateModelImg(*m_pDlgItem->m_ViewData_Src.img, *m_pMessageImg, m_ptROI_Start, m_ptROI_End, m_pDlgItem->m_ViewData_Src.rect);
 			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_MODEL, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
@@ -437,8 +397,8 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 void CDlg_ImgPrcs::OnPaint()
 {
 	CPaintDC dc(this); 
-	m_pDlgItem->DrawImage(m_ViewDataDst);
-	m_pDlgItem->DrawImage(m_ViewDataSrc);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Src);
 }
 
 
@@ -493,7 +453,7 @@ void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 
 			m_bClicked = false;
 			m_ptROI_End = point;
-			OnDrawROI(m_ViewDataSrc);
+			OnDrawROI(m_pDlgItem->m_ViewData_Src);
 		}
 	}
 
@@ -510,7 +470,7 @@ void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 		if (m_bClicked == true)
 		{
 			m_ptROI_End = point;
-			OnDrawROI(m_ViewDataSrc);
+			OnDrawROI(m_pDlgItem->m_ViewData_Src);
 		}
 	}
 

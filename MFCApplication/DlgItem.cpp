@@ -9,6 +9,7 @@ CDlgItem::CDlgItem()
 
 CDlgItem::~CDlgItem()
 {
+	ReleaseViewData();
 }
 
 
@@ -47,41 +48,108 @@ void CDlgItem::CreateBitMapInfo(ViewData &ViewData)
 		}
 	}
 
-	ViewData.BitMapInfo->bmiHeader.biWidth = ViewData.img->cols;
-	ViewData.BitMapInfo->bmiHeader.biHeight = -ViewData.img->rows;
+	ViewData.BitMapInfo->bmiHeader.biWidth = ViewData.ScreenImg->cols;
+	ViewData.BitMapInfo->bmiHeader.biHeight = -ViewData.ScreenImg->rows;
 }
 
 void CDlgItem::DrawImage(ViewData &View)
 {
 	SetStretchBltMode(View.dc->GetSafeHdc(), COLORONCOLOR);
-	StretchDIBits(View.dc->GetSafeHdc(), 0, 0, View.rect.Width(), View.rect.Height(), 0, 0, View.img->cols, View.img->rows, View.img->data, View.BitMapInfo , DIB_RGB_COLORS, SRCCOPY);
+	StretchDIBits(View.dc->GetSafeHdc(), 0, 0, View.rect.Width(), View.rect.Height(), 0, 0, View.ScreenImg->cols, View.ScreenImg->rows, View.ScreenImg->data, View.BitMapInfo , DIB_RGB_COLORS, SRCCOPY);
+}
+
+void CDlgItem::CorrectBitMapWidth(Mat SrcImg , Mat& DstImg)
+{
+	int iModelSpanWidth = SrcImg.cols;
+	if (iModelSpanWidth % 4 != 0)
+	{
+		iModelSpanWidth = SrcImg.cols + (4 - SrcImg.cols % 4);
+	}
+	else
+	{
+		iModelSpanWidth = SrcImg.cols;
+	}
+
+	Mat NewImg(SrcImg.rows, iModelSpanWidth, SrcImg.type());
+
+	for (int j = 0; j < NewImg.rows; j++)
+	{
+		uchar *p = NewImg.ptr<uchar>(j);
+		for (int i = 0; i < iModelSpanWidth; i++)
+		{
+			if(SrcImg.channels() == 1)
+			{
+				if (i >= SrcImg.cols)
+				{
+					p[i] = 0;
+				}
+				else
+				{
+					p[i] = SrcImg.at<uchar>(j, i);
+				}
+			}
+			else
+			{
+				if (i >= SrcImg.cols)
+				{
+					p[i * 3 + 0] = 0;
+					p[i * 3 + 1] = 0;
+					p[i * 3 + 2] = 0;
+				}
+				else
+				{
+					p[i * 3 + 0] = SrcImg.at<uchar>(j, (i * 3 + 0));
+					p[i * 3 + 1] = SrcImg.at<uchar>(j, (i * 3 + 1));
+					p[i * 3 + 2] = SrcImg.at<uchar>(j, (i * 3 + 2));
+				}
+			}
+		}
+	}
+	DstImg = NewImg.clone();
 }
 
 void CDlgItem::InitViewData(CWnd* pWnd, CWnd* pWnd_Ext /*= NULL*/)
 {
-	this->m_ViewData_SrcImg.BitMapInfo = NULL;
-	this->m_ViewData_SrcImg.img = new Mat;
-	this->m_ViewData_SrcImg.dc = new CClientDC(pWnd);
-	this->m_ViewData_DstImg.BitMapInfo = NULL;
-	this->m_ViewData_DstImg.img = new Mat;
-	
-	pWnd->GetClientRect(&this->m_ViewData_SrcImg.rect);
+	this->m_ViewData_Src.BitMapInfo = NULL;
+	this->m_ViewData_Dst.BitMapInfo = NULL;
+	this->m_ViewData_Src.img = new Mat;
+	this->m_ViewData_Dst.img = new Mat;
+	this->m_ViewData_Src.ScreenImg = new Mat;
+	this->m_ViewData_Dst.ScreenImg = new Mat;
+	this->m_ViewData_Src.dc = new CClientDC(pWnd);
+
+	pWnd->GetClientRect(&this->m_ViewData_Src.rect);
 
 	if (pWnd_Ext == NULL)
 	{
-		this->m_ViewData_DstImg.dc = new CClientDC(pWnd);
-		pWnd->GetClientRect(&this->m_ViewData_DstImg.rect);
+		this->m_ViewData_Dst.dc = new CClientDC(pWnd);
+		pWnd->GetClientRect(&this->m_ViewData_Dst.rect);
 	}
 	else
 	{
-		this->m_ViewData_DstImg.dc = new CClientDC(pWnd_Ext);
-		pWnd_Ext->GetClientRect(&this->m_ViewData_DstImg.rect);
+		this->m_ViewData_Dst.dc = new CClientDC(pWnd_Ext);
+		pWnd_Ext->GetClientRect(&this->m_ViewData_Dst.rect);
 	}
 
-	this->CreateBitMapInfo(this->m_ViewData_DstImg);
-	this->CreateBitMapInfo(this->m_ViewData_SrcImg);
+	this->CreateBitMapInfo(this->m_ViewData_Dst);
+	this->CreateBitMapInfo(this->m_ViewData_Src);
+}
 
-	//PatBlt(m_ViewData_DstImg.dc->GetSafeHdc(),0, 0, m_ViewData_DstImg.rect.Width(), m_ViewData_DstImg.rect.Height(), BLACKNESS);
-	//PatBlt(m_ViewData_SrcImg.dc->GetSafeHdc(), 0, 0, m_ViewData_SrcImg.rect.Width(), m_ViewData_SrcImg.rect.Height(), BLACKNESS);
+void CDlgItem::ReleaseViewData()
+{
+	delete this->m_ViewData_Src.BitMapInfo;
+	delete this->m_ViewData_Dst.BitMapInfo;
+	delete this->m_ViewData_Src.img;
+	delete this->m_ViewData_Dst.img;
+	delete this->m_ViewData_Src.ScreenImg;
+	delete this->m_ViewData_Dst.ScreenImg;
+	delete this->m_ViewData_Src.dc;
+	delete this->m_ViewData_Dst.dc;
+}
 
+void CDlgItem::DrawViewData(ViewData & View)
+{
+	CorrectBitMapWidth(*View.img, *View.ScreenImg);
+	CreateBitMapInfo(View);
+	DrawImage(View);
 }

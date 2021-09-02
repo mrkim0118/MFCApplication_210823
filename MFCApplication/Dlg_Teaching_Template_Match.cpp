@@ -128,68 +128,66 @@ void CDlg_Teaching_Template_Match::CreateModelImg(Mat SrcImg, Mat& DstImg, CPoin
 	int iHeight = (int)(SrcImg.rows*ry2 - SrcImg.rows*ry);
 
 	Rect ROI(iStartX, IStartY, iWidth, iHeight);
-	Mat rectimg = SrcImg(ROI);
+	DstImg = SrcImg(ROI);
+
+	//m_pDlgItem->CorrectBitMapWidth()
 
 	//// Width 값 4의 배수로 맞추기.
-	int iModelSpanWidth = 0;
+	//int iModelSpanWidth = 0;
 
-	iModelSpanWidth = iWidth;
-	if (iModelSpanWidth % 4 != 0)
-	{
-		iModelSpanWidth = iWidth + (4 - iWidth % 4);
-	}
-	else
-	{
-		iModelSpanWidth = iWidth;
-	}
+	//iModelSpanWidth = iWidth;
+	//if (iModelSpanWidth % 4 != 0)
+	//{
+	//	iModelSpanWidth = iWidth + (4 - iWidth % 4);
+	//}
+	//else
+	//{
+	//	iModelSpanWidth = iWidth;
+	//}
 
-	Mat newimg(iHeight, iModelSpanWidth, rectimg.type());
+	//Mat newimg(iHeight, iModelSpanWidth, rectimg.type());
 
-	for (int j = 0; j < rectimg.rows; j++)
-	{
-		uchar *p = newimg.ptr<uchar>(j);
-		for (int i = 0; i < iModelSpanWidth; i++)
-		{
-			if (i >= rectimg.cols)
-			{
-				p[i * 3 + 0] = 0;
-				p[i * 3 + 1] = 0;
-				p[i * 3 + 2] = 0;
-			}
-			else
-			{
-				p[i * 3 + 0] = rectimg.at<uchar>(j, (i * 3 + 0));
-				p[i * 3 + 1] = rectimg.at<uchar>(j, (i * 3 + 1));
-				p[i * 3 + 2] = rectimg.at<uchar>(j, (i * 3 + 2));
-			}
-		}
-	}
-	DstImg = newimg.clone();
+	//for (int j = 0; j < rectimg.rows; j++)
+	//{
+	//	uchar *p = newimg.ptr<uchar>(j);
+	//	for (int i = 0; i < iModelSpanWidth; i++)
+	//	{
+	//		if (i >= rectimg.cols)
+	//		{
+	//			p[i * 3 + 0] = 0;
+	//			p[i * 3 + 1] = 0;
+	//			p[i * 3 + 2] = 0;
+	//		}
+	//		else
+	//		{
+	//			p[i * 3 + 0] = rectimg.at<uchar>(j, (i * 3 + 0));
+	//			p[i * 3 + 1] = rectimg.at<uchar>(j, (i * 3 + 1));
+	//			p[i * 3 + 2] = rectimg.at<uchar>(j, (i * 3 + 2));
+	//		}
+	//	}
+	//}
+	//DstImg = newimg.clone();
 
 }
 LRESULT CDlg_Teaching_Template_Match::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 {
-	Mat *img = (Mat*)lParam;
-	*m_pDlgItem->m_ViewData_SrcImg.img = img->clone();
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
-
-	*m_pModelImg = m_pDlgItem->m_ViewData_SrcImg.img->clone();
+	m_pDlgItem->m_ViewData_Src.img = (Mat*)lParam;
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Src);
+	*m_pModelImg = m_pDlgItem->m_ViewData_Src.img->clone();
 
 	return 0;
 }
 
 LRESULT CDlg_Teaching_Template_Match::OnReceiveNorm(WPARAM wParam, LPARAM lParam)
 {
-	m_pDlgItem->m_ViewData_DstImg.img = (Mat*)lParam;
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->m_ViewData_Dst.img = (Mat*)lParam;
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Dst);
 	return 0;
 }
 
 void CDlg_Teaching_Template_Match::OnPaint()
 {
 	CPaintDC dc(this);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Src);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
 }

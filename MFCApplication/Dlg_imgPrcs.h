@@ -39,12 +39,9 @@ private:
 	unique_ptr<CDlgItem> m_pDlgItem;
 	Mat* m_pMessageImg;
 
-	CDlg_Teaching_Threshold *m_pDlgThreshold;
-	CDlg_Teaching_Morphology *m_pDlgMorphology;
-	CDlg_Teaching_Template_Match *m_pDlgTemplateMatch;
-
-	CDlgItem::ViewData m_ViewDataSrc;
-	CDlgItem::ViewData m_ViewDataDst;
+	unique_ptr<CDlg_Teaching_Threshold> m_pDlgThreshold;
+	unique_ptr<CDlg_Teaching_Morphology> m_pDlgMorphology;
+	unique_ptr<CDlg_Teaching_Template_Match> m_pDlgTemplateMatch;
 
 	int m_iInspMode;
 	CComboBox m_Cmb_Mode;

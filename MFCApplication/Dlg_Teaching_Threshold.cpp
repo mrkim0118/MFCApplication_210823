@@ -188,9 +188,8 @@ void CDlg_Teaching_Threshold::UpdateTestImg()
 	tThresholdParams.iThreshold = m_iEdit_Threshold_Value;
 	tThresholdParams.eType = (ThresholdTypes)GetThresholdMethod();
 
-	m_pOpenCV->ThresHold(*m_pDlgItem->m_ViewData_SrcImg.img, *m_pDlgItem->m_ViewData_DstImg.img, tThresholdParams);
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_DstImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pOpenCV->ThresHold(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tThresholdParams);
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Dst);
 }
 
 
@@ -208,9 +207,8 @@ void CDlg_Teaching_Threshold::OnEnChangeEditThreshold()
 
 LRESULT CDlg_Teaching_Threshold::OnReceiveImg(WPARAM wParam, LPARAM lParam)
 {
-	m_pDlgItem->m_ViewData_SrcImg.img = (Mat*)lParam;
-	m_pDlgItem->CreateBitMapInfo(m_pDlgItem->m_ViewData_SrcImg);
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_SrcImg);
+	m_pDlgItem->m_ViewData_Src.img = (Mat*)lParam;
+	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Src);
 
 	return 0;
 }
@@ -245,7 +243,7 @@ void CDlg_Teaching_Threshold::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pSc
 
 		m_iEdit_Threshold_Value = m_Slider_Threshold.GetPos();
 
-		if (m_pDlgItem->m_ViewData_SrcImg.img->empty() != TRUE)
+		if (m_pDlgItem->m_ViewData_Src.img->empty() != TRUE)
 		{
 			UpdateTestImg();
 		}
@@ -271,7 +269,7 @@ void CDlg_Teaching_Threshold::OnEnChangeEditThresholdVal()
 
 	m_Slider_Threshold.SetPos(m_iEdit_Threshold_Value);
 
-	if (m_pDlgItem->m_ViewData_SrcImg.img != NULL)
+	if (m_pDlgItem->m_ViewData_Src.img != NULL)
 	{
 		UpdateTestImg();
 	}
@@ -283,5 +281,5 @@ void CDlg_Teaching_Threshold::OnEnChangeEditThresholdVal()
 void CDlg_Teaching_Threshold::OnPaint()
 {
 	CPaintDC dc(this); 
-	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_DstImg);
+	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
 }
