@@ -61,4 +61,5 @@ public:
 	int GetAdaptiveUse();
 
 	void UpdateTestImg();
+	afx_msg void OnDestroy();
 };

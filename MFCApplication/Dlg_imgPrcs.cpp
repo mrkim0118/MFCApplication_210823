@@ -120,7 +120,7 @@ void CDlg_ImgPrcs::OnDrawROI(CDlgItem::ViewData& viewdata)
 	pOldBitmap = memDC.SelectObject(&bitmap);
 
 	SetStretchBltMode(memDC.GetSafeHdc(), COLORONCOLOR);
-	StretchDIBits(memDC.GetSafeHdc(), 0, 0, viewdata.rect.Width(), viewdata.rect.Height(), 0, 0, viewdata.img->cols, viewdata.img->rows, viewdata.img->data, viewdata.BitMapInfo, DIB_RGB_COLORS, SRCCOPY);
+	StretchDIBits(memDC.GetSafeHdc(), 0, 0, viewdata.rect.Width(), viewdata.rect.Height(), 0, 0, viewdata.ScreenImg->cols, viewdata.ScreenImg->rows, viewdata.ScreenImg->data, viewdata.BitMapInfo, DIB_RGB_COLORS, SRCCOPY);
 
 	pOldPen = memDC.SelectObject(&penRed);
 	pOldBrush = memDC.SelectObject(&brushRed);
@@ -162,6 +162,7 @@ BEGIN_MESSAGE_MAP(CDlg_ImgPrcs, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -231,8 +232,8 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd, m_pDlgItem->m_pWnd_Ext);
 	m_pDlgThreshold->ShowWindow(SW_SHOW);
 
-	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetClientRect(&m_DlgRect);
-
+	GetDlgItem(IDC_STATIC_SRC_VIEW)->GetWindowRect(&m_DlgRect);
+	ScreenToClient(&m_DlgRect);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -462,6 +463,7 @@ void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 {
+
 	if (m_DlgRect.PtInRect(point))
 	{
 		point.x = point.x - m_DlgRect.left;
@@ -476,4 +478,12 @@ void CDlg_ImgPrcs::OnMouseMove(UINT nFlags, CPoint point)
 
 
 	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+
+void CDlg_ImgPrcs::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	m_pDlgItem->ReleaseViewData();
 }

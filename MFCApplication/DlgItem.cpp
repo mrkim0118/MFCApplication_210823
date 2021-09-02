@@ -9,7 +9,6 @@ CDlgItem::CDlgItem()
 
 CDlgItem::~CDlgItem()
 {
-	ReleaseViewData();
 }
 
 

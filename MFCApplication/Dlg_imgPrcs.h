@@ -73,4 +73,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 
 
+	afx_msg void OnDestroy();
 };

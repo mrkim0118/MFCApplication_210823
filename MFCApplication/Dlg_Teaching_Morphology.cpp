@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CDlg_Teaching_Morphology, CDialogEx)
 	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_MORPHOLOGY_TEST, OnReceiveImg)
 	ON_WM_PAINT()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -281,4 +282,12 @@ void CDlg_Teaching_Morphology::OnPaint()
 {
 	CPaintDC dc(this);
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
+}
+
+
+void CDlg_Teaching_Morphology::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	m_pDlgItem->ReleaseViewData();
 }

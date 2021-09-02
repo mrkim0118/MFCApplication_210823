@@ -35,4 +35,5 @@ public:
 
 	void CreateModelImg(Mat SrcImg , Mat& DstImg, CPoint ptStart , CPoint ptEnd , CRect rect);
 	afx_msg void OnPaint();
+	afx_msg void OnDestroy();
 };

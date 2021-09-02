@@ -61,4 +61,5 @@ public:
 
 
 	afx_msg void OnPaint();
+	afx_msg void OnDestroy();
 };

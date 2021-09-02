@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CDlg_Teaching_Template_Match, CDialogEx)
 	ON_MESSAGE(WM_TEMPLATE_MATCH_MODEL, OnReceiveImg)
 	ON_MESSAGE(WM_TEMPLATE_MATCH_NORM, OnReceiveNorm)
 	ON_WM_PAINT()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -190,4 +191,13 @@ void CDlg_Teaching_Template_Match::OnPaint()
 	CPaintDC dc(this);
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Src);
 	m_pDlgItem->DrawImage(m_pDlgItem->m_ViewData_Dst);
+}
+
+
+void CDlg_Teaching_Template_Match::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	m_pDlgItem->ReleaseViewData();
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }

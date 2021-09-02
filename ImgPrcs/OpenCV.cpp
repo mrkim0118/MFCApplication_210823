@@ -344,7 +344,7 @@ bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchPar
 		minMaxLoc(Result, 0 ,&dMax, 0 , &MaxLoc);
 		DstImg =  mSrc.clone();
 		string strResult = format("Result Max : %.3f", dMax);
-		putText(DstImg, strResult, Point(DstImg.cols*0.05, DstImg.rows*0.05), FONT_HERSHEY_DUPLEX, 0.7, SCALAR_COLOR_LIGHT_SKY, 2);
+		putText(DstImg, strResult, Point(DstImg.cols*0.05, DstImg.rows*0.05), FONT_HERSHEY_DUPLEX, 1, SCALAR_COLOR_LIGHT_SKY, 2);
 		rectangle(DstImg, Rect(MaxLoc.x, MaxLoc.y, tTemplateMatchParams.Model.cols, tTemplateMatchParams.Model.rows), SCALAR_COLOR_LIGHT_SKY, 2);
 	}
 	return true;
