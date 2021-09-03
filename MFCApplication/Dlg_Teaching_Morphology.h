@@ -41,6 +41,9 @@ private:
 public:
 
 	virtual BOOL OnInitDialog();
+	
+	afx_msg void OnPaint();
+	afx_msg void OnDestroy();
 	afx_msg void OnEnChangeEditElementAnchorX();
 	afx_msg void OnEnChangeEditElementAnchorY();
 	afx_msg void OnEnChangeEditMorphologyAnchorX();
@@ -58,8 +61,4 @@ public:
 	int GetElementShape();
 	int GetMorphologyOperation();
 	void UpdateTestImg();
-
-
-	afx_msg void OnPaint();
-	afx_msg void OnDestroy();
 };

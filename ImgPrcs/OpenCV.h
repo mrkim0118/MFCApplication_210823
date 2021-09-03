@@ -12,8 +12,12 @@ typedef vector<vector<Point>> ContoursType;
 
 #define SCALAR_COLOR_WHITE Scalar(255,255,255)
 #define SCALAR_COLOR_BLACK Scalar(0,0,0)
-#define SCALAR_COLOR_YELLOW Scalar(0,255,255)
+
 #define SCALAR_COLOR_RED Scalar(0,0,255)
+#define SCALAR_COLOR_GREEN Scalar(255,0,0)
+#define SCALAR_COLOR_BLUE Scalar(0,255,0)
+
+#define SCALAR_COLOR_YELLOW Scalar(0,255,255)
 #define SCALAR_COLOR_LIGHT_SKY Scalar(234,255,18)
 
 class COpenCV
@@ -26,7 +30,13 @@ private:
 	CEtc  m_Etc;
 
 public:
-
+	enum ColorOrder
+	{
+		_COLOR_G_ = 0,
+		_COLOR_B_,
+		_COLOR_R_,
+		_COLOR_COUNT_MAX
+	};
 	struct ThresHoldParams
 	{
 		int iThreshold = 128;
@@ -98,7 +108,7 @@ public:
 	bool TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchParams tTemplateMatchParams , Mat& Normalize);
 	int Labeling(InputArray SrcImg , Mat& DstImg, LabelingParams &tLabelingParams);
 	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
-	void GetHistogramImg(Mat & Img, Mat &imgHist);
+	void GetHistogramImg(Mat & Img, Mat &imgHist , Scalar Color);
 
 };
 

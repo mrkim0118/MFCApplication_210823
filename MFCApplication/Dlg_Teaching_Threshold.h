@@ -44,6 +44,7 @@ public:
 
 	virtual BOOL OnInitDialog();
 
+	afx_msg void OnDestroy();
 	afx_msg void OnEnChangeEditAdaptiveBlockSize();
 	afx_msg void OnEnChangeEditAdaptiveC();
 	afx_msg void OnEnChangeEditThreshold();
@@ -61,5 +62,4 @@ public:
 	int GetAdaptiveUse();
 
 	void UpdateTestImg();
-	afx_msg void OnDestroy();
 };
