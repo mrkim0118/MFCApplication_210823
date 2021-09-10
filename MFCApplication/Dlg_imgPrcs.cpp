@@ -38,6 +38,7 @@ void CDlg_ImgPrcs::HideAllTeachingDlg()
 	m_pDlgMorphology->ShowWindow(SW_HIDE);
 	m_pDlgThreshold->ShowWindow(SW_HIDE);
 	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
+	m_pDlgHistogram->ShowWindow(SW_HIDE);
 }
 
 void CDlg_ImgPrcs::InitTeachingTab()
@@ -45,6 +46,7 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	m_Teaching_Tab.InsertItem(0, _T("Threshold"));
 	m_Teaching_Tab.InsertItem(1, _T("Morphology"));
 	m_Teaching_Tab.InsertItem(2, _T("TemplateMatch"));
+	m_Teaching_Tab.InsertItem(3, _T("Histogram"));
 	m_Teaching_Tab.SetCurSel(0);
 
 	CRect rect;
@@ -65,6 +67,11 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	m_pDlgTemplateMatch->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
 
+	m_pDlgHistogram = make_unique<CDlg_Teaching_Histogram>();
+	m_pDlgHistogram->Create(IDD_DLG_HISTOGRAM, &m_Teaching_Tab);
+	m_pDlgHistogram->MoveWindow(0, 20, rect.Width(), rect.Height());
+	m_pDlgHistogram->ShowWindow(SW_HIDE);
+
 }
 
 int CDlg_ImgPrcs::GetInspMode()
@@ -73,19 +80,19 @@ int CDlg_ImgPrcs::GetInspMode()
 	m_Cmb_Mode.GetLBText(m_Cmb_Mode.GetCurSel(), strMode);
 
 	if (strMode == _T("Morphorogy"))
-		m_iInspMode = CImgPrcs::MODE_MORPHOLOGY_;
+		m_iInspMode = CImgPrcs::_MODE_MORPHOLOGY_;
 	else if (strMode == _T("Threshold"))
-		m_iInspMode = CImgPrcs::MODE_THRESHOLD_;
-	else if (strMode == _T("Mask"))
-		m_iInspMode = CImgPrcs::MODE_MASK_;
-	else if (strMode == _T("Labeling"))
-		m_iInspMode = CImgPrcs::MODE_LABELING_;
-	else if (strMode == _T("Contour"))
-		m_iInspMode = CImgPrcs::MODE_CONTOUR_;
-	else if (strMode == _T("GrayHistogram"))
-		m_iInspMode = CImgPrcs::MODE_HISTOGRAM_;
+		m_iInspMode = CImgPrcs::_MODE_THRESHOLD_;
 	else if (strMode == _T("TemplateMatch"))
-		m_iInspMode = CImgPrcs::MODE_TEMPLATE_MATCH_;
+		m_iInspMode = CImgPrcs::_MODE_TEMPLATE_MATCH_;
+	else if (strMode == _T("Histogram"))
+		m_iInspMode = CImgPrcs::_MODE_HISTOGRAM_;
+	else if (strMode == _T("Contour"))
+		m_iInspMode = CImgPrcs::_MODE_CONTOUR_;
+	else if (strMode == _T("Labeling"))
+		m_iInspMode = CImgPrcs::_MODE_LABELING_; 
+	else if (strMode == _T("Mask"))
+		m_iInspMode = CImgPrcs::_MODE_MASK_;
 
 	return m_iInspMode;
 }
@@ -219,12 +226,12 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	InitTeachingTab();
 
 	m_Cmb_Mode.AddString(_T("Threshold")); 
-	m_Cmb_Mode.AddString(_T("Mask"));
-	m_Cmb_Mode.AddString(_T("Morphorogy"));
-	m_Cmb_Mode.AddString(_T("Labeling"));
-	m_Cmb_Mode.AddString(_T("Contour"));
-	m_Cmb_Mode.AddString(_T("GrayHistogram"));
+	m_Cmb_Mode.AddString(_T("Morphorogy")); 
 	m_Cmb_Mode.AddString(_T("TemplateMatch"));
+	m_Cmb_Mode.AddString(_T("Histogram"));
+	m_Cmb_Mode.AddString(_T("Contour"));
+	m_Cmb_Mode.AddString(_T("Labeling")); 
+	m_Cmb_Mode.AddString(_T("Mask")); 
 	m_Cmb_Mode.SetCurSel(0);
 
 	m_pDlgItem->m_pWnd = GetDlgItem(IDC_STATIC_SRC_VIEW);
@@ -246,7 +253,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 
 	switch (m_iInspMode)
 	{
-	case CImgPrcs::MODE_MORPHOLOGY_:
+	case CImgPrcs::_MODE_MORPHOLOGY_:
 	{
 		COpenCV::ElementParams tElementParams;
 		tElementParams.eShape = (MorphShapes)m_pDlgMorphology->GetElementShape();
@@ -261,7 +268,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tMorphologyParams, tElementParams);
 		break;
 	}
-	case CImgPrcs::MODE_THRESHOLD_:
+	case CImgPrcs::_MODE_THRESHOLD_:
 	{
 		
 		if (m_pDlgThreshold->GetAdaptiveUse() == TRUE)
@@ -284,26 +291,27 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		}
 		break;
 	}
-	case CImgPrcs::MODE_MASK_:
+	case CImgPrcs::_MODE_MASK_:
 		break;
-	case CImgPrcs::MODE_LABELING_:
+	case CImgPrcs::_MODE_LABELING_:
 	{
 		COpenCV::LabelingParams tLabelingParams;
 		m_pOpenCV->Labeling(*m_pDlgItem->m_ViewData_Dst.img, *m_pDlgItem->m_ViewData_Dst.img, tLabelingParams);
 		break;
 	}
-	case CImgPrcs::MODE_CONTOUR_:
+	case CImgPrcs::_MODE_CONTOUR_:
 	{
 		COpenCV::ContourParams tContourParams;
 		m_pOpenCV->Contour(*m_pDlgItem->m_ViewData_Dst.img, *m_pDlgItem->m_ViewData_Dst.img, tContourParams);
 		break;
 	}
-	case CImgPrcs::MODE_HISTOGRAM_:
-	{
-		m_pOpenCV->Histogram(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img);
+	case CImgPrcs::_MODE_HISTOGRAM_:
+	{ 
+		COpenCV::HistogramParams tHistogramParams;
+		m_pOpenCV->Histogram(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img , tHistogramParams);
 		break;
 	}
-	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	case CImgPrcs::_MODE_TEMPLATE_MATCH_:
 	{
 		COpenCV::TemplateMatchParams tTemplateMatchParams;
 		tTemplateMatchParams.Model = m_pDlgTemplateMatch->GetModelImg();
@@ -328,23 +336,29 @@ void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 
 	switch (iSelected)
 	{
-	case CImgPrcs::MODE_MORPHOLOGY_:
-	{
-		m_pDlgMorphology->ShowWindow(SW_SHOW);
-		break;
-	}
-	case CImgPrcs::MODE_THRESHOLD_:
+	case CImgPrcs::_MODE_THRESHOLD_:
 	{
 		m_pDlgThreshold->ShowWindow(SW_SHOW);
 		break;
 	}
-	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	case CImgPrcs::_MODE_MORPHOLOGY_:
+	{
+		m_pDlgMorphology->ShowWindow(SW_SHOW);
+		break;
+	}
+	case CImgPrcs::_MODE_TEMPLATE_MATCH_:
 	{
 		m_pDlgTemplateMatch->ShowWindow(SW_SHOW);
 		break;
 	}
+	case CImgPrcs::_MODE_HISTOGRAM_:
+	{
+		m_pDlgHistogram->ShowWindow(SW_SHOW);
+		break;
+	}
 	}
 
+	m_Cmb_Mode.SetCurSel(iSelected);
 	*pResult = 0;
 }
 
@@ -364,7 +378,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 
 	switch (m_iInspMode)
 	{
-	case CImgPrcs::MODE_THRESHOLD_:
+	case CImgPrcs::_MODE_THRESHOLD_:
 	{
 		if (m_pDlgThreshold != NULL)
 		{
@@ -373,7 +387,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 		}
 		break;
 	}
-	case CImgPrcs::MODE_MORPHOLOGY_:
+	case CImgPrcs::_MODE_MORPHOLOGY_:
 	{
 		if (m_pDlgMorphology != NULL)
 		{
@@ -382,12 +396,21 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 		}
 		break;
 	}
-	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	case CImgPrcs::_MODE_TEMPLATE_MATCH_:
 	{
 		if (m_pDlgTemplateMatch != NULL)
 		{
 			m_pDlgTemplateMatch->CreateModelImg(*m_pDlgItem->m_ViewData_Src.img, *m_pMessageImg, m_ptROI_Start, m_ptROI_End, m_pDlgItem->m_ViewData_Src.rect);
 			::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_MODEL, NULL, (LPARAM)m_pMessageImg);
+		}
+		break;
+	}
+	case CImgPrcs::_MODE_HISTOGRAM_:
+	{
+		if (m_pDlgHistogram != NULL)
+		{
+			*m_pMessageImg = m_pDlgItem->m_ViewData_Src.img->clone();
+			::SendMessage(m_pDlgHistogram->GetSafeHwnd(), WM_HISTOGRAM, NULL, (LPARAM)m_pMessageImg);
 		}
 		break;
 	}
@@ -410,14 +433,17 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 	HideAllTeachingDlg();
 	switch (m_iInspMode)
 	{
-	case CImgPrcs::MODE_THRESHOLD_:
+	case CImgPrcs::_MODE_THRESHOLD_:
 		m_pDlgThreshold->ShowWindow(SW_SHOW);
 		break;
-	case CImgPrcs::MODE_MORPHOLOGY_:
+	case CImgPrcs::_MODE_MORPHOLOGY_:
 		m_pDlgMorphology->ShowWindow(SW_SHOW);
 		break;
-	case CImgPrcs::MODE_TEMPLATE_MATCH_:
+	case CImgPrcs::_MODE_TEMPLATE_MATCH_:
 		m_pDlgTemplateMatch->ShowWindow(SW_SHOW);
+		break;
+	case CImgPrcs::_MODE_HISTOGRAM_:
+		m_pDlgHistogram->ShowWindow(SW_SHOW);
 		break;
 
 	}
@@ -429,7 +455,7 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	m_iInspMode = GetInspMode();
-	if (m_iInspMode == CImgPrcs::MODE_TEMPLATE_MATCH_)
+	if (m_iInspMode == CImgPrcs::_MODE_TEMPLATE_MATCH_)
 	{
 		if(m_DlgRect.PtInRect(point))
 		{
@@ -445,7 +471,7 @@ void CDlg_ImgPrcs::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CDlg_ImgPrcs::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	if (m_iInspMode == CImgPrcs::MODE_TEMPLATE_MATCH_)
+	if (m_iInspMode == CImgPrcs::_MODE_TEMPLATE_MATCH_)
 	{
 		if (m_DlgRect.PtInRect(point))
 		{

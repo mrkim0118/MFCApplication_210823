@@ -95,20 +95,27 @@ public:
 		TemplateMatchModes eTemplateMatchModes = TM_CCOEFF_NORMED;
 	};
 
+	struct HistogramParams
+	{
+		int iBinNum = 256;
+		int iValueMin = 0;
+		int iValueMax = 256;
+	};
+
 public:
 	bool CheckImg(Mat img);
 	bool CheckImgPath(String strFilePath);
 	bool SaveImg(String strImgPath, InputArray Arrayimg, vector<int> Param = {0});
     Mat LoadImg(String strImgPath, ImreadModes eMode = IMREAD_COLOR);
 	bool Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg);
-	bool Histogram(InputArray SrcImg, Mat& DstImg);
+	bool Histogram(InputArray SrcImg, Mat& DstImg, HistogramParams &tHistogramParams);
 	bool ThresHold_Adaptive(InputArray SrcImg , Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams);
 	bool ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &ThresHoldParams);
 	bool Morphology(InputArray SrcImg , Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams);
 	bool TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchParams tTemplateMatchParams , Mat& Normalize);
 	int Labeling(InputArray SrcImg , Mat& DstImg, LabelingParams &tLabelingParams);
 	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
-	void GetHistogramImg(Mat & Img, Mat &imgHist , Scalar Color);
+	void GetHistogramImg(Mat & Img, Mat &imgHist , Scalar Color , HistogramParams &tHistogramParams);
 
 };
 

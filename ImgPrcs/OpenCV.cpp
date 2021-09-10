@@ -229,7 +229,7 @@ bool COpenCV::Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg)
 	return TRUE;
 }
 
-bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
+bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg , HistogramParams &tHistogramParams)
 {
 	Mat mSrc = SrcImg.getMat();
 	if (CheckImg(mSrc) == TRUE)
@@ -237,13 +237,13 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 		int iChannelCnt = mSrc.channels();
 
 		int iChannels[] = { 0 };
-		int idimensions = 1;
-		const int iHistSize[] = { 256 };
-		float fGrayLevel[] = { 0 , 256 };
+		int idimensions = 1; // 구하려는 히스토그램의 채널 갯수
+		const int iHistSize[] = { tHistogramParams.iBinNum }; // bin의 갯수
+		float fGrayLevel[] = { tHistogramParams.iValueMin , tHistogramParams.iValueMax }; // 스케일값의 최대 최소값
 		const float* fRanges[] = { fGrayLevel };
 		Scalar Color = SCALAR_COLOR_BLACK;
 
-		Mat imgHist(100, 256, CV_8UC3, Scalar(255,255,255));
+		Mat imgHist(256, tHistogramParams.iValueMax, CV_8UC3, SCALAR_COLOR_WHITE);
 
 		DstImg = imgHist.clone();
 		if (iChannelCnt == 1)
@@ -251,13 +251,11 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 			Mat GrayHist;
 
 			calcHist(&mSrc, 1, iChannels, noArray(), GrayHist, idimensions, iHistSize, fRanges);
-			GetHistogramImg(GrayHist, DstImg , Color);
+			GetHistogramImg(GrayHist, DstImg , Color , tHistogramParams);
 		}
 		else
 		{
-	/*		Mat BGR[3]; */
 			Mat BGR_Hist[3];
-			//split(mSrc, BGR);
 			for (int i = 0; i < iChannelCnt; i++)
 			{
 				if (i == _COLOR_B_)
@@ -276,7 +274,7 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 					iChannels[0] = i;
 				}
 				calcHist(&mSrc, 1, iChannels, noArray(), BGR_Hist[i], idimensions, iHistSize, fRanges);
-				GetHistogramImg(BGR_Hist[i], DstImg , Color);
+				GetHistogramImg(BGR_Hist[i], DstImg , Color , tHistogramParams);
 			}
 
 		}
@@ -284,18 +282,18 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg)
 	return 0;
 }
 
-void COpenCV::GetHistogramImg( Mat & SrcImg , Mat &Dst , Scalar Color)
+void COpenCV::GetHistogramImg( Mat & SrcImg , Mat &Dst , Scalar Color , HistogramParams &tHistogramParams)
 {
 	//CV_Assert(Img.type() == CV_32FC1);
-	CV_Assert(SrcImg.size() == Size(1,256));
+	//CV_Assert(SrcImg.size() == Size(1,256));
 
 	double dHistMax;
 	minMaxLoc(SrcImg, 0, &dHistMax);
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < tHistogramParams.iBinNum; i++)
 	{
-		int iRefVal = cvRound(SrcImg.at<float>(i, 0) * 100 / dHistMax);
-		line(Dst, Point(i, 101- iRefVal), Point(i, 100 - iRefVal), Color,2);
+		int iRefVal = cvRound(SrcImg.at<float>(i, 0) * tHistogramParams.iValueMax / dHistMax);
+		line(Dst, Point(i, tHistogramParams.iValueMax - iRefVal), Point(i, tHistogramParams.iValueMax - iRefVal), Color,2);
 
 	}
 }

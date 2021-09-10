@@ -8,6 +8,7 @@
 #include "Dlg_Teaching_Threshold.h"
 #include "Dlg_Teaching_Morphology.h"
 #include "Dlg_Teaching_Template_Match.h"
+#include "Dlg_Teaching_Histogram.h"
 
 
 using namespace cv;
@@ -42,6 +43,7 @@ private:
 	unique_ptr<CDlg_Teaching_Threshold> m_pDlgThreshold;
 	unique_ptr<CDlg_Teaching_Morphology> m_pDlgMorphology;
 	unique_ptr<CDlg_Teaching_Template_Match> m_pDlgTemplateMatch;
+	unique_ptr<CDlg_Teaching_Histogram> m_pDlgHistogram;
 
 	int m_iInspMode;
 	CComboBox m_Cmb_Mode;
