@@ -101,21 +101,32 @@ public:
 		int iValueMin = 0;
 		int iValueMax = 256;
 	};
-
+	
+	struct BrightnessParams
+	{
+		int iBrightness = 0;
+		float fContrast = 0;
+	};
 public:
+
+	Mat LoadImg(String strImgPath, ImreadModes eMode = IMREAD_COLOR);
+	
+	int Labeling(InputArray SrcImg, Mat& DstImg, LabelingParams &tLabelingParams);
+
 	bool CheckImg(Mat img);
 	bool CheckImgPath(String strFilePath);
 	bool SaveImg(String strImgPath, InputArray Arrayimg, vector<int> Param = {0});
-    Mat LoadImg(String strImgPath, ImreadModes eMode = IMREAD_COLOR);
 	bool Mask(InputArray SrcImg, Mat& DstImg, InputArray MaskImg);
 	bool Histogram(InputArray SrcImg, Mat& DstImg, HistogramParams &tHistogramParams);
 	bool ThresHold_Adaptive(InputArray SrcImg , Mat& DstImg, AdaptiveThresHoldParams &tAdaptiveThresHoldParams);
 	bool ThresHold(InputArray SrcImg, Mat& DstImg, ThresHoldParams &ThresHoldParams);
 	bool Morphology(InputArray SrcImg , Mat& DstImg, MorphologyParams &tMorPhologyParams, ElementParams &tElementParams);
 	bool TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchParams tTemplateMatchParams , Mat& Normalize);
-	int Labeling(InputArray SrcImg , Mat& DstImg, LabelingParams &tLabelingParams);
-	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
+	bool Brightness(InputArray SrcImg, Mat& DstImg, BrightnessParams tBrightnessParams);
+	bool Contrast(InputArray SrcImg, Mat& DstImg, float fValue);
 	void GetHistogramImg(Mat & Img, Mat &imgHist , Scalar Color , HistogramParams &tHistogramParams);
+
+	ContoursType Contour(InputArray SrcImg, Mat& DstImg, ContourParams tContourParams);
 
 };
 

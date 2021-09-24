@@ -39,6 +39,7 @@ void CDlg_ImgPrcs::HideAllTeachingDlg()
 	m_pDlgThreshold->ShowWindow(SW_HIDE);
 	m_pDlgTemplateMatch->ShowWindow(SW_HIDE);
 	m_pDlgHistogram->ShowWindow(SW_HIDE);
+	m_pDlgBrightness->ShowWindow(SW_HIDE);
 }
 
 void CDlg_ImgPrcs::InitTeachingTab()
@@ -47,6 +48,7 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	m_Teaching_Tab.InsertItem(1, _T("Morphology"));
 	m_Teaching_Tab.InsertItem(2, _T("TemplateMatch"));
 	m_Teaching_Tab.InsertItem(3, _T("Histogram"));
+	m_Teaching_Tab.InsertItem(4, _T("Brightness"));
 	m_Teaching_Tab.SetCurSel(0);
 
 	CRect rect;
@@ -72,6 +74,11 @@ void CDlg_ImgPrcs::InitTeachingTab()
 	m_pDlgHistogram->MoveWindow(0, 20, rect.Width(), rect.Height());
 	m_pDlgHistogram->ShowWindow(SW_HIDE);
 
+	m_pDlgBrightness = make_unique<CDlg_Teaching_Brightness>();
+	m_pDlgBrightness->Create(IDD_DLG_BRIGHTNESS, &m_Teaching_Tab);
+	m_pDlgBrightness->MoveWindow(0, 20, rect.Width(), rect.Height());
+	m_pDlgBrightness->ShowWindow(SW_HIDE);
+
 }
 
 int CDlg_ImgPrcs::GetInspMode()
@@ -87,6 +94,8 @@ int CDlg_ImgPrcs::GetInspMode()
 		m_iInspMode = CImgPrcs::_MODE_TEMPLATE_MATCH_;
 	else if (strMode == _T("Histogram"))
 		m_iInspMode = CImgPrcs::_MODE_HISTOGRAM_;
+	else if (strMode == _T("Brightness"))
+		m_iInspMode = CImgPrcs::_MODE_BRIGHTNESS_;
 	else if (strMode == _T("Contour"))
 		m_iInspMode = CImgPrcs::_MODE_CONTOUR_;
 	else if (strMode == _T("Labeling"))
@@ -178,11 +187,22 @@ END_MESSAGE_MAP()
 
 void CDlg_ImgPrcs::OnBnClickedBtnLoadImg()
 {
-	CFileDialog fileDlg(TRUE, NULL, NULL, OFN_READONLY, _T("image file(*.jpg;*.bmp;*.png;)|*.jpg;*.bmp;*.png;|All Files(*.*)|*.*||"));
-	if (fileDlg.DoModal() == IDOK)
-	{
-		CString path = fileDlg.GetPathName();
+	DWORD MAXFILE = 2562;
 
+	CFileDialog FileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, _T("image file(*.jpg;*.bmp;*.png;)|*.jpg;*.bmp;*.png;|All Files(*.*)|*.*||"));
+	//FileDlg.m_ofn.nMaxFile = MAXFILE;
+
+
+	if (FileDlg.DoModal() == IDOK)
+	{
+		m_ImgFileList.clear();
+
+		for (POSITION pos = FileDlg.GetStartPosition(); pos != NULL;)
+			m_ImgFileList.push_back(FileDlg.GetNextPathName(pos));
+	}
+	if (m_ImgFileList.size() == 1)
+	{
+		CString path = *m_ImgFileList.begin();
 		CT2CA pszString(path);
 		string strPath(pszString);
 
@@ -203,7 +223,7 @@ void CDlg_ImgPrcs::OnMenuImgPrcs()
 
 void CDlg_ImgPrcs::OnBnClickedBtnSaveImg()
 {
-	CFileDialog fileDlg(FALSE, L"bmp", L"*.bmp", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR, L"All Files (*.*)|*.*|Bmp Files (*.bmp)|*.bmp|",this);
+	CFileDialog fileDlg(TRUE, L"bmp", L"*.bmp", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT /*| OFN_NOCHANGEDIR*/ | OFN_ALLOWMULTISELECT, L"All Files (*.*)|*.*|Bmp Files (*.bmp)|*.bmp|", this);
 
 	if (fileDlg.DoModal() == IDOK)
 	{
@@ -222,13 +242,13 @@ BOOL CDlg_ImgPrcs::OnInitDialog()
 	m_pOpenCV = make_unique<COpenCV>();
 	m_pDlgItem = make_unique<CDlgItem>();
 	m_pMessageImg = new Mat;
-
 	InitTeachingTab();
 
 	m_Cmb_Mode.AddString(_T("Threshold")); 
 	m_Cmb_Mode.AddString(_T("Morphorogy")); 
 	m_Cmb_Mode.AddString(_T("TemplateMatch"));
 	m_Cmb_Mode.AddString(_T("Histogram"));
+	m_Cmb_Mode.AddString(_T("Brightness"));
 	m_Cmb_Mode.AddString(_T("Contour"));
 	m_Cmb_Mode.AddString(_T("Labeling")); 
 	m_Cmb_Mode.AddString(_T("Mask")); 
@@ -258,11 +278,11 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		COpenCV::ElementParams tElementParams;
 		tElementParams.eShape = (MorphShapes)m_pDlgMorphology->GetElementShape();
 		tElementParams.anchor = Point(m_pDlgMorphology->GetElementAnchorX(), m_pDlgMorphology->GetElementAnchorY());
-		tElementParams.ksize = Size(m_pDlgMorphology->GetElemetSIze() , m_pDlgMorphology->GetElemetSIze());
+		tElementParams.ksize = Size(m_pDlgMorphology->GetElemetSIze(), m_pDlgMorphology->GetElemetSIze());
 
 		COpenCV::MorphologyParams tMorphologyParams;
 		tMorphologyParams.eOperation = (MorphTypes)m_pDlgMorphology->GetMorphologyOperation();
-		tMorphologyParams.Anchor = Point(m_pDlgMorphology->GetMorphAnchorX() , m_pDlgMorphology->GetMorphAnchorY());
+		tMorphologyParams.Anchor = Point(m_pDlgMorphology->GetMorphAnchorX(), m_pDlgMorphology->GetMorphAnchorY());
 		tMorphologyParams.Kernel = getStructuringElement(tElementParams.eShape, tElementParams.ksize, tElementParams.anchor);
 
 		m_pOpenCV->Morphology(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tMorphologyParams, tElementParams);
@@ -270,7 +290,7 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 	}
 	case CImgPrcs::_MODE_THRESHOLD_:
 	{
-		
+
 		if (m_pDlgThreshold->GetAdaptiveUse() == TRUE)
 		{
 			COpenCV::AdaptiveThresHoldParams tAdaptiveThresHoldParams;
@@ -306,9 +326,9 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		break;
 	}
 	case CImgPrcs::_MODE_HISTOGRAM_:
-	{ 
+	{
 		COpenCV::HistogramParams tHistogramParams;
-		m_pOpenCV->Histogram(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img , tHistogramParams);
+		m_pOpenCV->Histogram(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tHistogramParams);
 		break;
 	}
 	case CImgPrcs::_MODE_TEMPLATE_MATCH_:
@@ -316,17 +336,24 @@ void CDlg_ImgPrcs::OnBnClickedBtnImgPrcsStart()
 		COpenCV::TemplateMatchParams tTemplateMatchParams;
 		tTemplateMatchParams.Model = m_pDlgTemplateMatch->GetModelImg();
 		tTemplateMatchParams.eTemplateMatchModes = (TemplateMatchModes)m_pDlgTemplateMatch->GetTemplateMatchMethod();
-		m_pOpenCV->TemplateMatching(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tTemplateMatchParams , tTemplateMatchParams.Normalize);
+		m_pOpenCV->TemplateMatching(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tTemplateMatchParams, tTemplateMatchParams.Normalize);
 
 		*m_pMessageImg = tTemplateMatchParams.Normalize.clone();
 		::SendMessage(m_pDlgTemplateMatch->GetSafeHwnd(), WM_TEMPLATE_MATCH_NORM, NULL, (LPARAM)m_pMessageImg);
 		break;
 	}
+	case CImgPrcs::_MODE_BRIGHTNESS_:
+	{
+		COpenCV::BrightnessParams tBrightnessParams;
+		tBrightnessParams.iBrightness = m_pDlgBrightness->GetBrightness();
+		tBrightnessParams.fContrast = m_pDlgBrightness->GetContrast();
+		m_pOpenCV->Brightness(*m_pDlgItem->m_ViewData_Src.img, *m_pDlgItem->m_ViewData_Dst.img, tBrightnessParams);
+		break;
 	}
 
 	m_pDlgItem->DrawViewData(m_pDlgItem->m_ViewData_Dst);
+	}
 }
-
 
 void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -354,6 +381,11 @@ void CDlg_ImgPrcs::OnTcnSelchangeTeachingTab(NMHDR *pNMHDR, LRESULT *pResult)
 	case CImgPrcs::_MODE_HISTOGRAM_:
 	{
 		m_pDlgHistogram->ShowWindow(SW_SHOW);
+		break;
+	}
+	case CImgPrcs::_MODE_BRIGHTNESS_:
+	{
+		m_pDlgBrightness->ShowWindow(SW_SHOW);
 		break;
 	}
 	}
@@ -414,6 +446,15 @@ void CDlg_ImgPrcs::OnBnClickedBtnDstToTeachingDlg()
 		}
 		break;
 	}
+	case CImgPrcs::_MODE_BRIGHTNESS_:
+	{
+		if (m_pDlgBrightness != NULL)
+		{
+			*m_pMessageImg = m_pDlgItem->m_ViewData_Src.img->clone();
+			::SendMessage(m_pDlgBrightness->GetSafeHwnd(), WM_BRIGHTNESS, NULL, (LPARAM)m_pMessageImg);
+		}
+		break;
+	}
 	}
 
 }
@@ -444,6 +485,9 @@ void CDlg_ImgPrcs::OnCbnSelchangeCmbMode()
 		break;
 	case CImgPrcs::_MODE_HISTOGRAM_:
 		m_pDlgHistogram->ShowWindow(SW_SHOW);
+		break;
+	case CImgPrcs::_MODE_BRIGHTNESS_:
+		m_pDlgBrightness->ShowWindow(SW_SHOW);
 		break;
 
 	}
@@ -512,4 +556,10 @@ void CDlg_ImgPrcs::OnDestroy()
 	CDialogEx::OnDestroy();
 
 	m_pDlgItem->ReleaseViewData();
+	
+	if (m_pMessageImg != NULL)
+	{
+		delete m_pMessageImg;
+		m_pMessageImg = NULL;
+	}
 }

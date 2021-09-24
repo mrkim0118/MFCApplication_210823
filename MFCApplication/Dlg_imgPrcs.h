@@ -9,7 +9,7 @@
 #include "Dlg_Teaching_Morphology.h"
 #include "Dlg_Teaching_Template_Match.h"
 #include "Dlg_Teaching_Histogram.h"
-
+#include "Dlg_Teaching_Brightness.h"
 
 using namespace cv;
 using namespace std;
@@ -38,28 +38,32 @@ private:
 	//COpenCV *m_pOpenCV;
 	unique_ptr<COpenCV> m_pOpenCV;
 	unique_ptr<CDlgItem> m_pDlgItem;
-	Mat* m_pMessageImg;
 
 	unique_ptr<CDlg_Teaching_Threshold> m_pDlgThreshold;
 	unique_ptr<CDlg_Teaching_Morphology> m_pDlgMorphology;
 	unique_ptr<CDlg_Teaching_Template_Match> m_pDlgTemplateMatch;
 	unique_ptr<CDlg_Teaching_Histogram> m_pDlgHistogram;
+	unique_ptr<CDlg_Teaching_Brightness> m_pDlgBrightness;
+	list<CString> m_ImgFileList;
 
-	int m_iInspMode;
+
+	Mat* m_pMessageImg;
 	CComboBox m_Cmb_Mode;
 	CPoint m_ptROI_Start;
 	CPoint m_ptROI_End;
 	CRect m_DlgRect;
 	CTabCtrl m_Teaching_Tab;
 	bool m_bClicked;
+	int m_iInspMode;
+
 
 public:
 	virtual BOOL OnInitDialog();
 
 	void HideAllTeachingDlg();
 	void InitTeachingTab();
-	int GetInspMode();
 	void OnDrawROI(CDlgItem::ViewData& viewdata);
+	int GetInspMode();
 
 	afx_msg void OnBnClickedBtnLoadImg();
 	afx_msg void OnMenuImgPrcs();
@@ -73,7 +77,5 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-
-
 	afx_msg void OnDestroy();
 };

@@ -51,6 +51,9 @@
     <ClInclude Include="Dlg_Teaching_Histogram.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Dlg_Teaching_Brightness.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication.cpp">
@@ -78,6 +81,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Dlg_Teaching_Histogram.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Dlg_Teaching_Brightness.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

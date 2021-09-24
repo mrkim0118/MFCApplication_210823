@@ -16,7 +16,7 @@ CDlg_Teaching_Histogram::CDlg_Teaching_Histogram(CWnd* pParent /*=NULL*/)
 	, m_iEdit_Bin_Num(256)
 	, m_iEdit_Value_Bin_Number(0)
 	, m_iEdit_Value_Min(0)
-	, m_iEdit_Value_Max(512)
+	, m_iEdit_Value_Max(256)
 {
 	m_pOpenCV = make_unique<COpenCV>();
 	m_pDlgItem = make_unique<CDlgItem>();
@@ -83,7 +83,7 @@ BOOL CDlg_Teaching_Histogram::OnInitDialog()
 	m_pDlgItem->m_pWnd = GetDlgItem((IDC_STATIC_HISTOGRAM_TEST));
 	m_pDlgItem->InitViewData(m_pDlgItem->m_pWnd);
 
-	m_Slider_Histogram.SetRange(1, 256);
+	m_Slider_Histogram.SetRange(1, 512);
 	m_Slider_Histogram.SetPos(m_iEdit_Value_Bin_Number);
 	m_Slider_Histogram.SetLineSize(1);
 	m_Slider_Histogram.SetPageSize(1);

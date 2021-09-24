@@ -243,7 +243,7 @@ bool COpenCV::Histogram(InputArray SrcImg , Mat& DstImg , HistogramParams &tHist
 		const float* fRanges[] = { fGrayLevel };
 		Scalar Color = SCALAR_COLOR_BLACK;
 
-		Mat imgHist(256, tHistogramParams.iValueMax, CV_8UC3, SCALAR_COLOR_WHITE);
+		Mat imgHist(tHistogramParams.iValueMax, tHistogramParams.iBinNum, CV_8UC3, SCALAR_COLOR_WHITE);
 
 		DstImg = imgHist.clone();
 		if (iChannelCnt == 1)
@@ -292,8 +292,8 @@ void COpenCV::GetHistogramImg( Mat & SrcImg , Mat &Dst , Scalar Color , Histogra
 
 	for (int i = 0; i < tHistogramParams.iBinNum; i++)
 	{
-		int iRefVal = cvRound(SrcImg.at<float>(i, 0) * tHistogramParams.iValueMax / dHistMax);
-		line(Dst, Point(i, tHistogramParams.iValueMax - iRefVal), Point(i, tHistogramParams.iValueMax - iRefVal), Color,2);
+		//int iRefVal = cvRound(SrcImg.at<float>(i, 0) * tHistogramParams.iValueMax / dHistMax);
+		line(Dst, Point(i, tHistogramParams.iValueMax+1 - cvRound(SrcImg.at<float>(i, 0) * tHistogramParams.iValueMax / dHistMax)), Point(i, tHistogramParams.iValueMax - cvRound(SrcImg.at<float>(i, 0) * tHistogramParams.iValueMax / dHistMax)), Color,2);
 
 	}
 }
@@ -373,6 +373,47 @@ bool COpenCV::TemplateMatching(InputArray SrcImg, Mat & DstImg, TemplateMatchPar
 		string strResult = format("Result Max : %.3f", dMax);
 		putText(DstImg, strResult, Point(DstImg.cols*0.05, DstImg.rows*0.05), FONT_HERSHEY_DUPLEX, 1, SCALAR_COLOR_LIGHT_SKY, 2);
 		rectangle(DstImg, Rect(MaxLoc.x, MaxLoc.y, tTemplateMatchParams.Model.cols, tTemplateMatchParams.Model.rows), SCALAR_COLOR_LIGHT_SKY, 2);
+	}
+	return true;
+}
+
+bool COpenCV::Brightness(InputArray SrcImg, Mat & DstImg, BrightnessParams tBrightnessParams)
+{
+	Mat mSrc = SrcImg.getMat();
+	if (CheckImg(mSrc) == true)
+	{
+		Mat Dst(mSrc.rows, mSrc.cols, mSrc.type());
+
+		for (int j = 0; j < mSrc.rows; j++)
+		{
+			for (int i = 0; i < mSrc.cols; i++)
+			{
+				if (mSrc.channels() == 1)
+				{
+					Dst.at<uchar>(j, i) = saturate_cast<uchar>(mSrc.at<uchar>(j, i) + tBrightnessParams.iBrightness);
+				}
+				else if (mSrc.channels() == 3)
+				{
+					Dst.at<uchar>(j, (i * 3 + 0)) = saturate_cast<uchar>(mSrc.at<uchar>(j, (i * 3 + 0)) + tBrightnessParams.iBrightness);
+					Dst.at<uchar>(j, (i * 3 + 1)) = saturate_cast<uchar>(mSrc.at<uchar>(j, (i * 3 + 1)) + tBrightnessParams.iBrightness);
+					Dst.at<uchar>(j, (i * 3 + 2)) = saturate_cast<uchar>(mSrc.at<uchar>(j, (i * 3 + 2)) + tBrightnessParams.iBrightness);
+				}
+			}
+		} 
+		Contrast(Dst, DstImg, tBrightnessParams.fContrast);
+
+		/*DstImg = Dst.clone();*/
+	}
+	return true;
+}
+
+bool COpenCV::Contrast(InputArray SrcImg, Mat & DstImg, float fValue)
+{
+	Mat mSrc = SrcImg.getMat();
+	if (CheckImg(mSrc) == true)
+	{
+
+		DstImg = mSrc + (mSrc - 128) * fValue;
 	}
 	return true;
 }
